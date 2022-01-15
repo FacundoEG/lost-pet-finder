@@ -1,0 +1,25 @@
+{
+  "name": "lost-pet-finder",
+  "version": "1.0.0",
+  "license": "MIT",
+  "scripts": {
+    "dev:be": "nodemon --watch ./be-src/index.ts --exec ts-node ./be-src/index.ts",
+    "dev:fe": "parcel serve ./fe-src/index.html",
+    "build:be": "tsc",
+    "build:fe": "parcel build ./fe-src/index.html --dist-dir fe-dist",
+    "build": "npm run build:be && npm run build:fe",
+    "start": "node ./be-dist/index.js",
+    "sync": "ts-node ./be-src/sync.ts"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "parcel": "^2.0.0-rc.0",
+    "pg": "^8.7.1",
+    "pg-hstore": "^2.3.4",
+    "sequelize": "^6.12.0-beta.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.15"
+  }
+}
