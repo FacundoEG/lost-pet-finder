@@ -1,7 +1,10 @@
-function main() {
-  console.log("hola");
-  console.log(process.env.API_BASE_URL);
-  console.log(process.env.API_SECRET);
+import "./pages/home-page";
+import "./router";
+import { state } from "./state";
+
+async function main() {
+  const test = await state.test();
+  console.log(test);
 }
 
 main();

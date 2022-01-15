@@ -12,6 +12,7 @@
     "sync": "ts-node ./be-src/sync.ts"
   },
   "dependencies": {
+    "@vaadin/router": "^1.7.4",
     "cors": "^2.8.5",
     "express": "^4.17.1",
     "parcel": "^2.0.0-rc.0",

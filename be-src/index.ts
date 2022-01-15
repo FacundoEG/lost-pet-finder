@@ -4,9 +4,6 @@ import * as path from "path";
 const rutaRelativa = path.resolve(__dirname, "../fe-dist/index.html");
 
 // TESTS
-// ENV BARS
-console.log(process.env.API_BASE_URL);
-console.log(process.env.API_SECRET);
 
 // API INIT AND CONFIG
 const port = process.env.PORT || 3000;
@@ -18,13 +15,11 @@ app.use(cors());
 
 // CREA UN PRODUCTO PIDIENDO UN TOKEN Y SE LO ASIGNA A UN USUARIO
 app.get("/test", async (req, res) => {
-  res
-    .status(200)
-    .json({
-      message: "todo ok",
-      base_url: process.env.API_BASE_URL,
-      secret: process.env.API_SECRET,
-    });
+  res.status(200).json({
+    message: "todo ok",
+    base_url: process.env.API_BASE_URL,
+    secret: process.env.API_SECRET,
+  });
 });
 
 // FRONT
