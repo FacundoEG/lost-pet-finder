@@ -7,7 +7,7 @@
     "dev:fe": "parcel serve ./fe-src/index.html",
     "build:be": "tsc",
     "build:fe": "parcel build ./fe-src/index.html --dist-dir fe-dist",
-    "build": "yarn build:be && yarn build:fe",
+    "build": "yarn build:fe && yarn build:be",
     "start": "node ./be-dist/index.js",
     "sync": "ts-node ./be-src/sync.ts"
   },
