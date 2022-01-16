@@ -2,8 +2,10 @@ import * as cors from "cors";
 import * as express from "express";
 import * as path from "path";
 const rutaRelativa = path.resolve(__dirname, "../fe-dist/index.html");
+import { connectionTest } from "./models/connection";
 
 // TESTS
+connectionTest();
 
 // API INIT AND CONFIG
 const port = process.env.PORT || 3000;
