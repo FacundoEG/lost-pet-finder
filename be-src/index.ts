@@ -5,7 +5,6 @@ const rutaRelativa = path.resolve(__dirname, "../fe-dist/index.html");
 import { connectionTest } from "./models/connection";
 
 // TESTS
-connectionTest();
 
 // API INIT AND CONFIG
 const port = process.env.PORT || 3000;
@@ -15,10 +14,15 @@ app.use(cors());
 
 // ENDPOINTS
 
-// CREA UN PRODUCTO PIDIENDO UN TOKEN Y SE LO ASIGNA A UN USUARIO
+// TESTEA LA CONEXION A SEQUELIZE EN DEV Y PRODUCTION
 app.get("/test", async (req, res) => {
+  const prueba = await connectionTest();
+
+  console.log(prueba);
+
   res.status(200).json({
     message: "todo ok",
+    test: prueba,
     base_url: process.env.API_BASE_URL,
     secret: process.env.API_SECRET,
   });
