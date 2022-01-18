@@ -4,8 +4,6 @@ import * as path from "path";
 const rutaRelativa = path.resolve(__dirname, "../fe-dist/index.html");
 import { connectionTest } from "./models/connection";
 
-// TESTS
-
 // API INIT AND CONFIG
 const port = process.env.PORT || 3000;
 const app = express();
@@ -13,7 +11,6 @@ app.use(express.json());
 app.use(cors());
 
 // ENDPOINTS
-
 // TESTEA LA CONEXION A SEQUELIZE EN DEV Y PRODUCTION
 app.get("/test", async (req, res) => {
   const prueba = await connectionTest();

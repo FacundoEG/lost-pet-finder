@@ -1,16 +1,15 @@
 import { Sequelize } from "sequelize";
 
-/* //ESTO HAY QUE COMENTARLO AL HACER DEPLOY
+/* //ESTO HAY QUE COMENTARLO AL HACER DEPLOY!!
 import { sequalizePass } from "../../keys/sequalize";
  */
-
 export const sequelize = new Sequelize({
   dialect: "postgres",
-  username: "tldpdccjfekxzm",
+  username: "obsccrotjermzz",
   password: process.env.SEQ_PASS,
-  database: "dc1i03b0d25dvf",
+  database: "d3uq3m4fp1lh4d",
   port: 5432,
-  host: "ec2-18-234-17-166.compute-1.amazonaws.com",
+  host: "ec2-54-224-64-114.compute-1.amazonaws.com",
   ssl: true,
   dialectOptions: {
     ssl: {

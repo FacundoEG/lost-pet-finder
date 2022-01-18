@@ -18,7 +18,6 @@ const state = {
     for (const callback of this.listeners) {
       callback();
     }
-    sessionStorage.setItem("actualgame", JSON.stringify(newState));
   },
 
   //SUBSCRIBER
@@ -26,7 +25,7 @@ const state = {
     this.listeners.push(callback);
   },
 
-  // CREA UN NUEVO USUARIO Y DEVUELVE SU ID
+  // TESTEA LA CONEXIÓN A SEQUALIZE
   test() {
     return fetch(API_BASE_URL + "/test", {
       method: "get",
