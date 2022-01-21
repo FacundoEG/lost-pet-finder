@@ -39,12 +39,9 @@ const state = {
   },
 
   algoliaTest() {
-    return fetch(
-      `http://localhost:3000/petsbygeo?lat=-34.758566&long=-58.275575`,
-      {
-        method: "get",
-      }
-    )
+    return fetch(API_BASE_URL + "/petsbygeo?lat=-34.758566&long=-58.275575", {
+      method: "get",
+    })
       .then((res) => {
         return res.json();
       })
