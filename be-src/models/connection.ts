@@ -1,8 +1,8 @@
 import { Sequelize } from "sequelize";
+/* 
+//ESTO HAY QUE COMENTARLO AL HACER DEPLOY!!
+import { sequalizePass } from "../../keys/sequalize"; */
 
-/* //ESTO HAY QUE COMENTARLO AL HACER DEPLOY!!
-import { sequalizePass } from "../../keys/sequalize";
- */
 export const sequelize = new Sequelize({
   dialect: "postgres",
   username: "obsccrotjermzz",
@@ -28,6 +28,8 @@ async function connectionTest() {
     return "Connection has been established successfully.";
   } catch (error) {
     console.error("Unable to connect to the database:", error);
+
+    return "Unable to connect to the database";
   }
 }
 

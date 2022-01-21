@@ -3,6 +3,7 @@ import * as express from "express";
 import * as path from "path";
 const rutaRelativa = path.resolve(__dirname, "../fe-dist/index.html");
 import { connectionTest } from "./models/connection";
+import { index } from "./lib/algolia";
 
 // API INIT AND CONFIG
 const port = process.env.PORT || 3000;
@@ -23,6 +24,43 @@ app.get("/test", async (req, res) => {
     base_url: process.env.API_BASE_URL,
     secret: process.env.API_SECRET,
   });
+});
+
+// ALGOLIA TEST
+// CREA UNA MASCOTA DE PRUEBA
+app.post("/pets", async (req, res) => {
+  const { name, lat, lng, id } = req.body;
+
+  const newComercioInAlgolia = await index.saveObject({
+    objectID: id,
+    name: name,
+    _geoloc: {
+      lat: lat,
+      lng: lng,
+    },
+  });
+  res.json(newComercioInAlgolia);
+});
+
+// OBTENER TODOS LAS MASCOTAS CERCA DE LAT/LANG
+app.get("/petsbygeo", async (req, res) => {
+  const params = req.query;
+  const response = await index.search("", {
+    aroundLatLng: `${params.lat}, ${params.long}`,
+    aroundRadius: 1000,
+  });
+
+  /*   const findedIds = response.hits.map((maps) => {
+    return maps.objectID;
+  });
+
+  const findedStores = await Comercio.findAll({
+    where: {
+      id: findedIds,
+    },
+  }); */
+
+  res.json(response.hits);
 });
 
 // FRONT
