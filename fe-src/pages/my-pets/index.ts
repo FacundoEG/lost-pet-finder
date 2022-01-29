@@ -1,4 +1,4 @@
-class Home extends HTMLElement {
+class MyPets extends HTMLElement {
   shadow: ShadowRoot;
   constructor() {
     super();
@@ -15,12 +15,8 @@ class Home extends HTMLElement {
       flex-direction: column;
       align-items: center;
     }
-    
-    .main-container__title{
-      margin: 30px auto;
-    }
 
-    .main-conteiner{
+    .main-container{
       width: 100%;
       max-width: 400px;
       display: flex;
@@ -30,19 +26,15 @@ class Home extends HTMLElement {
       text-align: center;
       gap: 22px;
     }
+    
+    .main-container__title{
+      margin: 30px auto;
+    }
     `;
     this.shadow.appendChild(style);
   }
 
-  addListeners() {
-    const mainButton: HTMLButtonElement = this.shadow.querySelector(
-      ".welcome-container__button"
-    );
-    mainButton.addEventListener("click", (e) => {
-      e.preventDefault();
-      console.log("soy el button de bienvenida");
-    });
-  }
+  addListeners() {}
 
   // SE CREA EL CONNECTED CALLBACK
   connectedCallback() {
@@ -53,25 +45,11 @@ class Home extends HTMLElement {
     //SE CREA EL DIV DONDE SE ALOJARA LA PAGE
     const mainPage = document.createElement("main");
     mainPage.classList.add("welcome-container");
-
-    /* 
-    <div class="main-form-container"> 
-    <x-title>Soy el title</x-title>
-    <x-subtitle>Soy el subtitle</x-subtitle>
-    <x-parrafo>Soy el parrafo</x-parrafo>
-    <x-p-bold>Soy el parrafo bold</x-p-bold>
-    <x-caption>Soy el caption</x-caption>
-    <x-linktext>Soy el linktext</x-linktext> */
-    //SE RENDERIZA
-
     mainPage.innerHTML = `
-
-    <section class="main-conteiner">
-    <x-title class="main-container__title">Mascotas perdidas cerca tuyo</x-title>
-    <x-caption>Para ver las mascotas reportadas cerca tuyo necesitamos permiso para conocer tu ubicación.</x-caption>
-    <x-button class="welcome-container__button">Dar mi ubicación</x-button> 
+    <section class="main-container">
+    <x-title class="main-container__title">Mis mascotas reportadas</x-title>
+    <x-caption class="xcaption">AUN NO TIENES MASCOTAS REPORTADAS</x-caption>
     </section>
-
  `;
 
     this.shadow.appendChild(mainPage);
@@ -80,4 +58,4 @@ class Home extends HTMLElement {
     this.addListeners();
   }
 }
-customElements.define("home-page", Home);
+customElements.define("my-pets-page", MyPets);

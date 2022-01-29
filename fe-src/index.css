@@ -1,0 +1,21 @@
+:root {
+  --page-bgc: #18435a;
+  --header-bgc: #13293d;
+  --button1-bgc: #2c2c2c;
+  --button2-bgc: #2a628f;
+  --button3-bgc: #592979;
+  --button-active: rgb(42, 74, 75);
+  --font-colorWht: white;
+  --font-hover: cornflowerblue;
+  --font-link-color: #c07feb;
+}
+
+body {
+  margin: 0;
+  overflow: hidden;
+  color: var(--font-colorWht);
+}
+
+* {
+  box-sizing: border-box;
+}
