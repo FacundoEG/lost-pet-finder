@@ -1,7 +1,11 @@
 import * as jwt from "jsonwebtoken";
-import { SECRET } from "../../keys/secret";
 import { Auth } from "../models/models";
 import { getHashFromString } from "../middleware/methods";
+
+// COMENTAR ESTO AL HACER DEPLOY!
+/* import { SECRET } from "../../keys/secret";  */
+
+const SECRET = process.env.API_SECRET;
 
 async function checkEmail(userData: { email: string }) {
   const { email } = userData;
