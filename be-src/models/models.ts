@@ -9,4 +9,7 @@ Auth.belongsTo(User);
 User.hasMany(Pet);
 Pet.belongsTo(User);
 
+Pet.hasMany(Report);
+Report.belongsTo(Pet);
+
 export { User, Auth, Pet, Report };

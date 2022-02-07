@@ -7,6 +7,7 @@ Pet.init(
     name: DataTypes.STRING,
     photoUrl: DataTypes.STRING,
     state: DataTypes.STRING,
+    ubication: DataTypes.STRING,
     lat: DataTypes.FLOAT,
     lng: DataTypes.FLOAT,
   },

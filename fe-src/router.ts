@@ -4,7 +4,6 @@ const router = new Router(document.querySelector(".root"));
 
 router.setRoutes([
   { path: "/", component: "home-page" },
-  { path: "/home-page", component: "home-page" },
   { path: "/auth-page", component: "auth-page" },
   { path: "/my-data", component: "my-data-page" },
   { path: "/report-pet", component: "report-pet-page" },
@@ -12,5 +11,5 @@ router.setRoutes([
 ]);
 
 if (location.pathname === "/") {
-  Router.go("/home-page");
+  Router.go("/");
 }

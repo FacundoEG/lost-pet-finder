@@ -1,3 +1,5 @@
+const pawfondo = require("../../assets/paw-backgr.png");
+
 class MyPets extends HTMLElement {
   shadow: ShadowRoot;
   constructor() {
@@ -8,8 +10,12 @@ class MyPets extends HTMLElement {
     style.textContent = ` 
 
     .welcome-container{
-      height: 100vh;
-      padding: 60px 20px;
+      background-blend-mode: soft-light;
+      background-image: url(${pawfondo});
+      background-repeat: revert;
+      background-size: contain;
+      min-height: 82vh;
+      padding: 30px 20px 70px;
       background-color: var(--page-bgc);
       display: flex;
       flex-direction: column;

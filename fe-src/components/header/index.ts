@@ -39,6 +39,10 @@ class HeaderComp extends HTMLElement {
        align-items: center;
      }
 
+     img:active {
+      filter: invert(59%) sepia(35%) saturate(1935%) hue-rotate(224deg) brightness(98%) contrast(88%)
+    }
+
      .paw-icon__img,.hamburger-menu__img,.header-comp__window-closebutton__img{
       width: 40px;
      }
@@ -58,7 +62,7 @@ class HeaderComp extends HTMLElement {
       display:flex;
       flex-direction:column;
       align-items:center;
-      position:absolute;
+      position:fixed;
       background-color: var(--header-bgc);
       top: 0;
       transition: right 1s ease-in-out;
@@ -123,8 +127,12 @@ class HeaderComp extends HTMLElement {
       padding: 5px;
       color: var(--font-link-color);
       cursor: pointer;
-      text-decoration: underline;
      }
+
+    .p:hover{
+      text-decoration-line: underline;
+      color: var(--button-active)
+      }
 
      @media (min-width: 700px) {
       .header-comp__window-menu {

@@ -1,6 +1,8 @@
 import "./components/header";
 import "./components/fonts";
 import "./components/buttons";
+import "./components/loader";
+import "./components/petcard";
 import "./pages/home-page";
 import "./pages/auth";
 import "./pages/my-data";
@@ -11,9 +13,7 @@ import { state } from "./state";
 
 async function main() {
   const test = await state.test();
-  const algoliaTest = await state.algoliaTest();
   console.log("Connection test: ", test);
-  console.log("Algolia Test: ", algoliaTest);
 }
 
 main();

@@ -1,7 +1,11 @@
 const API_BASE_URL = process.env.API_BASE_URL || "http://localhost:3000";
 
 const state = {
-  data: {},
+  data: {
+    userData: {
+      geoLocation: null,
+    },
+  },
   listeners: [],
 
   ///////// BASIC STATE METHODS //////////
@@ -18,6 +22,15 @@ const state = {
     for (const callback of this.listeners) {
       callback();
     }
+  },
+
+  setCurrentGeoLocation(lat, lng) {
+    const currentState = this.getState();
+    currentState.userData.geoLocation = {
+      lat,
+      lng,
+    };
+    this.setState(currentState);
   },
 
   //SUBSCRIBER
@@ -38,8 +51,9 @@ const state = {
       });
   },
 
-  algoliaTest() {
-    return fetch(API_BASE_URL + "/petsbygeo?lat=-34.758566&long=-58.275575", {
+  getLostPetsByGeo() {
+    const { lat, lng } = this.getState().userData.geoLocation;
+    return fetch(API_BASE_URL + `/pets/getbygeo?lat=${lat}&lng=${lng}`, {
       method: "get",
     })
       .then((res) => {

@@ -13,7 +13,7 @@ class Title extends HTMLElement {
       box-sizing: border-box;
       font-family: "Montserrat";
       font-weight: bold;
-      font-size: 32px;
+      font-size: 40px;
     }
     `;
     var shadow = this.attachShadow({ mode: "open" });
@@ -120,8 +120,15 @@ class LinkText extends HTMLElement {
       font-weight: 500;
       font-size: 16px;
       text-transform: uppercase;
-      text-decoration-line: underline;
       color: var(--font-link-color);
+    }
+
+    .p:hover{
+      text-decoration-line: underline;
+      }
+
+    .p:active{
+      color: var(--button-active)
     }
     `;
     var shadow = this.attachShadow({ mode: "open" });
@@ -151,6 +158,7 @@ class Caption extends HTMLElement {
       font-size: 16px;
       text-transform: uppercase;
     }
+    
     `;
     var shadow = this.attachShadow({ mode: "open" });
     shadow.appendChild(style);
@@ -176,8 +184,18 @@ class ErrorText extends HTMLElement {
       align-items: center;
       justify-content: center;
       width: 100%;
-      gap: 8px;
-      color: #fb2424
+      gap: 7px;
+      color: #fb2424;
+      border-radius: 5px;
+      background-color: #000000b0;
+      padding: 3px 7px;
+    }
+
+    
+    @media (max-width: 500px) {
+      .label{
+        padding: 3px 6%
+      }
     }
     
     .error-icon{

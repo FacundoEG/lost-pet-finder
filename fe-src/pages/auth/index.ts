@@ -1,3 +1,4 @@
+const pawbackgr = require("../../assets/paw-backgr.png");
 class Auth extends HTMLElement {
   shadow: ShadowRoot;
   constructor() {
@@ -8,8 +9,12 @@ class Auth extends HTMLElement {
     style.textContent = ` 
 
     .welcome-container{
-      height: 100vh;
-      padding: 60px 20px;
+     background-blend-mode: soft-light;
+     background-image: url(${pawbackgr});
+     background-repeat: revert;
+     background-size: contain;
+      min-height: 82vh;
+      padding: 30px 20px 70px;
       background-color: var(--page-bgc);
       display: flex;
       flex-direction: column;
@@ -28,7 +33,7 @@ class Auth extends HTMLElement {
       flex-direction: column;
       align-items: center;
       text-align: center;
-      gap: 22px;
+      gap: 25px;
     }
 
     .form-conteiner__input{
@@ -43,7 +48,6 @@ class Auth extends HTMLElement {
       }
 
     .form-conteiner__label{
-      width: 100%;
       display: flex;
       flex-direction: column;
       align-items: start;
@@ -55,6 +59,11 @@ class Auth extends HTMLElement {
       margin-left: 3px;
     }
 
+    .email-label{
+      margin-bottom: 30px;
+      align-self: start;
+    }
+
     .form-conteiner__button{
       height: 50px;
       min-width: 275px;
@@ -64,22 +73,28 @@ class Auth extends HTMLElement {
       color: var(--font-colorWht);
       cursor: pointer;
       }
-  
-      .form-conteiner__button:active{
-        background-color: var(--button-active)
-      }
+      
+    .form-conteiner__button:active{
+     background-color: var(--button-active)
+    }
+      
+    .form-botton{
+      margin-top: 20px;
+    }
 
-      @media (min-width: 500px){
-        .form-conteiner__input{
-         width: 100%;
-         max-width: 335px;
-        }
       
      @media (min-width: 500px){
        .form-conteiner__button{
         width: 100%;
+        max-width: 335px;
        }
      }
+
+     @media (min-width: 500px){
+      .form-conteiner__input{
+       width: 100%;
+      }
+    }
     `;
     this.shadow.appendChild(style);
   }
