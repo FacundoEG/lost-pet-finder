@@ -2,10 +2,10 @@ import * as jwt from "jsonwebtoken";
 import { Auth } from "../models/models";
 import { getHashFromString } from "../middleware/methods";
 
-// COMENTAR ESTO AL HACER DEPLOY!
-/* import { SECRET } from "../../keys/secret";  */
+/* // COMENTAR ESTO AL HACER DEPLOY!
+import { SECRET } from "../../keys/secret"; */
 
-const SECRET = process.env.API_SECRET;
+const APPSECRET = process.env.API_SECRET; /*  || SECRET; */
 
 async function checkEmail(userData: { email: string }) {
   const { email } = userData;
@@ -49,14 +49,14 @@ async function getToken(userData: { email: string; password: string }) {
 
   // SI EXISTE DEVUELVE EL TOKEN
   if (authResponse) {
-    const token = jwt.sign({ id: authResponse.get("UserId") }, SECRET);
+    const token = jwt.sign({ id: authResponse.get("UserId") }, APPSECRET);
     return { token };
   }
 
   // SI NO EXISTE NO DEVUELVE UN ERROR
   if (!authResponse) {
     return {
-      error: "el email que ingresaste no existe o la contraseña no es valida",
+      error: "La contraseña es incorrecta",
     };
   }
 }

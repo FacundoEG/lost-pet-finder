@@ -1,4 +1,5 @@
 import { Router } from "@vaadin/router";
+import { state } from "../../state";
 
 const petPaw = require("../../assets/pet-paw.png");
 const xMark = require("../../assets/x-mark-white.png");
@@ -7,10 +8,11 @@ const user = require("../../assets/user.png");
 
 class HeaderComp extends HTMLElement {
   shadow: ShadowRoot;
-  testMail: string;
+  userEmail: string;
+  userToken: string;
   constructor() {
     super();
-    this.testMail = "F_E_G.93@hotmail.com";
+    this.userEmail = "F_E_G.93@hotmail.com";
     this.shadow = this.attachShadow({ mode: "open" });
 
     var style = document.createElement("style");
@@ -167,14 +169,33 @@ class HeaderComp extends HTMLElement {
     windowCloseButtonEl.addEventListener("click", () => this.toggleAction());
   }
 
+  // CHEQUEA QUE EL STATE TENGA EMAIL Y TOKEN SI NO TE ENVIA A AUTH-PAGE
+  authRedirect() {
+    const cs = state.getState();
+    const { email, token, pageToGo } = cs.userData;
+    const noEmailorToken = email == null || token == null;
+
+    if (noEmailorToken === true) {
+      Router.go("/auth-page");
+    }
+
+    if (noEmailorToken === false) {
+      const route = pageToGo.toString();
+      Router.go(route);
+    }
+  }
+
+  // LISTENERS DEL COMPONENTE
   addListeners() {
+    // ELEMENTS REFS
     const headerCompRef = this.shadow.children[1];
     const pawIconLink = headerCompRef.querySelector(".paw-icon__img");
     const myPetsLink = headerCompRef.querySelector(".my-pets");
     const myDataLink = headerCompRef.querySelector(".my-data");
     const reportPetLink = headerCompRef.querySelector(".report-pet");
+    const closeSessionLink = headerCompRef.querySelector(".close-session");
 
-    // CIERRA EL MENU HAMBURGUESA SI SE CLIQUEA EL ICONO DE LA PATA SOLAMENTE SI ESTA ABIERTO PREVIAMENTE
+    // CIERRA EL MENU HAMBURGUESA SI SE CLIQUEA EL ICONO DE LA PATA (SOLAMENTE SI ESTA ABIERTO PREVIAMENTE)
     pawIconLink.addEventListener("click", () => {
       const windowMenu: HTMLDivElement = headerCompRef.querySelector(
         ".header-comp__window-menu"
@@ -184,13 +205,56 @@ class HeaderComp extends HTMLElement {
       }
     });
 
-    // LISTENERS DE LOS LINKS DEL MENU HAMBURGUESA
-    myPetsLink.addEventListener("click", () => this.toggleAction());
-    myDataLink.addEventListener("click", () => this.toggleAction());
-    reportPetLink.addEventListener("click", () => this.toggleAction());
+    // CHEQUEA QUE EL USUARIO TENGA EMAIL Y TOKEN PARA REDIRIGIR A LA PAGINA ELEGIDA
+    myDataLink.addEventListener("click", () => {
+      this.toggleAction();
+      state.setPageToGo("/my-data");
+      this.authRedirect();
+    });
+    myPetsLink.addEventListener("click", () => {
+      this.toggleAction();
+      state.setPageToGo("/my-pets");
+      this.authRedirect();
+    });
+    reportPetLink.addEventListener("click", () => {
+      this.toggleAction();
+      state.setPageToGo("/report-pet");
+      this.authRedirect();
+    });
+
+    // SI EL USUARIO ESTA REGISTRADO, PERMITE CERRAR SESSIÓN Y SI NO LO ESTA LO DEJA INGRESAR
+    closeSessionLink.addEventListener("click", () => {
+      // SI EL USUARIO ES UN INVITADO Y NO SE REGISTRO
+      if (this.userEmail === "Invitado") {
+        this.toggleAction();
+        state.setPageToGo("/");
+        Router.go("/auth-page");
+      }
+
+      // SI EL USUARIO ESTA REGISTRADO
+      if (this.userEmail !== "Invitado") {
+        this.toggleAction();
+        state.disconnectUser();
+        Router.go("/");
+      }
+    });
   }
 
+  // RECARGA LA DATA CUANDO CAMBIA EL STATE
   connectedCallback() {
+    state.subscribe(() => {
+      const csToken = state.getToken();
+      const csEmail = state.getEmail();
+      this.userEmail = csEmail || "Invitado";
+      this.userToken = csToken || null;
+      this.shadow.children[1].remove();
+      this.render();
+    });
+    // PIDE LA DATA DEL STATE RENDERIZA LA PAGE
+    const csToken = state.getToken();
+    const csEmail = state.getEmail();
+    this.userEmail = csEmail || "Invitado";
+    this.userToken = csToken || null;
     this.render();
   }
 
@@ -211,16 +275,20 @@ class HeaderComp extends HTMLElement {
      </button>
 
      <div class="header-comp__window-menu-link">
-     <a class="my-data" href="/my-data"><x-subtitle>Mis datos</x-subtitle></a>
-     <a class="my-pets" href="/my-pets"><x-subtitle>Mis mascotas reportadas</x-subtitle></a>
-     <a class="report-pet" href="/report-pet"><x-subtitle>Reportar mascotas</x-subtitle></a>
+     <a class="my-data"><x-subtitle>Mis datos</x-subtitle></a>
+     <a class="my-pets"><x-subtitle>Mis mascotas reportadas</x-subtitle></a>
+     <a class="report-pet"><x-subtitle>Reportar mascotas</x-subtitle></a>
 
      <div class="user-data__container">
      <div class="user-data__box">
      <img src=${user} class="user-data__img"></img>
-     <x-parrafo>${this.testMail}</x-parrafo>
+     <x-parrafo>${
+       this.userEmail && this.userToken !== null ? this.userEmail : "Invitadx"
+     }</x-parrafo>
      </div>
-     <a><x-linktext>Cerrar sesión</x-linktext></a>
+     <a class="close-session"><x-linktext>${
+       this.userEmail !== "Invitado" ? "CERRAR SESIÓN" : "INICIAR SESIÓN"
+     }</x-linktext></a>
      </div>
      </nav>
     </div>

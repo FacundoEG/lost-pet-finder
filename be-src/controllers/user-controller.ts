@@ -1,5 +1,6 @@
 import { User, Auth, Pet } from "../models/models";
 import { getHashFromString } from "../middleware/methods";
+import { nanoid } from "nanoid";
 
 async function createNewUser(userData: {
   name: string;
@@ -7,6 +8,8 @@ async function createNewUser(userData: {
   password: string;
 }) {
   const { email, name, password } = userData;
+
+  const nano = nanoid(password.length);
 
   // VERIFICA QUE LA DATA DEL NUEVO USUARIO TENGA TODOS LOS DATOS
   if (!userData.name || !userData.email || !userData.password) {
@@ -34,8 +37,9 @@ async function createNewUser(userData: {
 
   // DEVUELVE UN MENSAJE Y UNA CONFIRMACIÓN SI EL USUARIO ES NUEVO
   return {
-    message: "Todo ok!",
+    message: "Tu usuario fue creado exitosamente!",
     newUser: userCreated,
+    nano,
   };
 }
 
@@ -76,7 +80,7 @@ async function updateUser(
   });
 
   // DEVUELVE LA CONFIRMACIÓN DE ACTUALIZACIÓN DEL USUARIO
-  return { message: "El usuario se modifico correctamente" };
+  return { message: "Tu usuario se modifico correctamente!" };
 }
 
 async function getUserData(userDataId: number) {
@@ -104,6 +108,12 @@ async function getUserReportedPets(userDataId: number) {
     where: { id: userDataId },
     include: [{ model: Pet, where: { state: "perdido" } }],
   });
+
+  if (userData == null) {
+    return {
+      error: "Aun no reportaste mascotas perdidas",
+    };
+  }
 
   // DEVUELVE SOLAMENTE LAS MASCOTAS REPORTADAS POR EL USUARIO
   return {

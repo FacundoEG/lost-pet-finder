@@ -14,6 +14,8 @@ import { state } from "./state";
 async function main() {
   const test = await state.test();
   console.log("Connection test: ", test);
+  // RECUPERA EL ESTADO GUARDADO EN SESSION STORAGE APENAS SE INGRESA A LA PAGE
+  state.restoreState();
 }
 
 main();

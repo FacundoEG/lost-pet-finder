@@ -1,6 +1,11 @@
 const pawBackground = require("../../assets/paw-backgr.png");
+import { state } from "../../state";
+import { nanoid } from "nanoid";
+import * as crypto from "crypto";
+
 class MyData extends HTMLElement {
   shadow: ShadowRoot;
+  userData: any;
   constructor() {
     super();
     this.shadow = this.attachShadow({ mode: "open" });
@@ -95,46 +100,145 @@ class MyData extends HTMLElement {
        width: 100%;
       }
     }
+
+    .data-container{
+      max-width: 1000px;
+      display: flex;
+      align-items: center;
+      flex-direction: column;
+      width: 100%;
+      margin: 30px auto 0px;
+      }
+
+      @media (min-width: 900px){
+        .data-container {
+        justify-content: center;
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 5%;
+        }
+      }
     `;
     this.shadow.appendChild(style);
   }
 
+  // SE AGREGAN LOS LISTENERS DE LA PAGE
   addListeners() {
+    const dataContainer = this.shadow.querySelector(".data-container");
     const mainForm: HTMLFormElement =
       this.shadow.querySelector(".form-conteiner");
-    mainForm.addEventListener("submit", (e: any) => {
+
+    // FORM SUBMIT LISTENER
+    mainForm.addEventListener("submit", async (e: any) => {
       e.preventDefault();
 
-      const emailData = e.target.email.value;
-      const passData = e.target.password.value;
-      const passRepeatedData = e.target.passwordRepeat.value;
+      // VALUES
+      const nameValue = e.target.name.value;
+      const passValue = e.target.password.value;
+      const repeatedPassValue = e.target.passwordRepeat.value;
 
-      console.log(emailData);
-      console.log(passData);
-      console.log(passRepeatedData);
-      console.log("soy el submit del form");
-      mainForm.reset();
+      // SE REVISA QUE LAS CONTRASEÑAS INGRESADAS COINCIDAN
+      if (passValue !== repeatedPassValue) {
+        dataContainer.innerHTML = `
+      <error-text>Las contraseñas ingresadas no coinciden</error-caption>
+      `;
+      }
+
+      // CHEQUEA QUE EL USUARIO NO VUELVA A PONER LA CONTRASEÑA INGRESADA ANTERIORMENTE
+      if (passValue === repeatedPassValue) {
+        const passWordHashed = this.getHashFromString(passValue);
+
+        const userDataResponse = await state.getUserData();
+        const userHashedPass = userDataResponse.authData["password"];
+
+        if (passWordHashed === userHashedPass) {
+          dataContainer.innerHTML = `
+          <error-text>Debes poner una contraseña diferente a la actual</error-caption>
+          `;
+        } else {
+          // CARGA EL LOADER
+          dataContainer.innerHTML = `
+        <x-loader>Debes poner una contraseña diferente a la actual</x-loader>
+        `;
+
+          // FORMATEA LA DATA PARA LA PROMESA
+          const newUserData = {
+            name: nameValue,
+            password: passValue,
+          };
+
+          // PROMESA DE ACTUALIZACIÓN DE USUARIO
+          const userUpdatePromise = await state.updateUserData(newUserData);
+
+          // SI LA PROMESA SE RESUELVE BIEN, DEVUELVE UN MENSAJE Y A LOS 1,5 SEGUNDOS CAMBIA EL STATE
+          if (userUpdatePromise.message) {
+            dataContainer.innerHTML = `
+          <x-caption>${userUpdatePromise.message}</x-caption>
+          `;
+
+            setTimeout(() => {
+              const nano = nanoid(passValue.length);
+              state.setUserName(nameValue);
+              state.setNano(nano);
+            }, 1500);
+          }
+
+          // SI LA PROMESA DEVUELVE UN ERROR SE LE AVISA AL USUARIO
+          if (userUpdatePromise.error) {
+            dataContainer.innerHTML = `
+          <error-text>${userUpdatePromise.error}</error-caption>
+          `;
+          }
+        }
+      }
     });
+  }
+
+  // DEVUELVE EL HASH PARA COMPARAR LAS PASSWORDS
+  getHashFromString(text: string) {
+    return crypto.createHash("sha256").update(text).digest("hex");
+  }
+
+  // ESTA FUNCION TRAE LA DATA PARA RELLENAR EL INPUT
+  importUserInputData() {
+    // SE TRAE LA DATA DEL STATE
+    const cs = this.userData;
+    const userName = cs.name;
+    const userNano = cs.nanoid;
+
+    // SE DECLARAN LAS REFERENCIAS
+    const mainForm: HTMLFormElement =
+      this.shadow.querySelector(".form-conteiner");
+    const nameInput: HTMLInputElement = mainForm.querySelector(".nameInput");
+    const passInput: HTMLInputElement =
+      mainForm.querySelector(".passWordInput");
+    const rPassInput: HTMLInputElement =
+      mainForm.querySelector(".rPassWordInput");
+
+    // SE AGREGAN LA DATA A LOS INPUTS
+    nameInput.value = userName;
+    passInput.value = userNano;
+    rPassInput.value = userNano;
   }
 
   // SE CREA EL CONNECTED CALLBACK
   connectedCallback() {
-    // RENDERIZA LA PAGE
+    state.subscribe(() => {
+      const currentState = state.getState();
+      this.userData = currentState.userData;
+      this.shadow.children[1].remove();
+      this.render();
+    });
+    // PIDE LA DATA DEL STATE RENDERIZA LA PAGE
+    const currentState = state.getState();
+    this.userData = currentState.userData;
     this.render();
   }
+
   render() {
     //SE CREA EL DIV DONDE SE ALOJARA LA PAGE
     const mainPage = document.createElement("main");
     mainPage.classList.add("welcome-container");
-
-    /* 
-    <div class="main-form-container"> 
-    <x-title>Soy el title</x-title>
-    <x-subtitle>Soy el subtitle</x-subtitle>
-    <x-parrafo>Soy el parrafo</x-parrafo>
-    <x-p-bold>Soy el parrafo bold</x-p-bold>
-    <x-caption>Soy el caption</x-caption>
-    <x-linktext>Soy el linktext</x-linktext> */
     //SE RENDERIZA
 
     mainPage.innerHTML = `
@@ -142,24 +246,26 @@ class MyData extends HTMLElement {
     <form class="form-conteiner">
     <x-title class="form-container__title">Mis Datos</x-title>
     <label class="form-conteiner__label email-label">
-    <x-caption class="xcaption">Email</x-caption>
-    <input class="form-conteiner__input" type=text" name="email">
+    <x-caption class="xcaption">Nombre</x-caption>
+    <input class="form-conteiner__input nameInput" type=text" name="name">
     </label> 
     <label class="form-conteiner__label">
     <x-caption class="xcaption">Contraseña</x-caption>
-    <input class="form-conteiner__input" type="password" name="password">
+    <input class="form-conteiner__input passWordInput" type="password" name="password">
     </label> 
     <label class="form-conteiner__label">
     <x-caption class="xcaption">Repetir Contraseña</x-caption>
-    <input class="form-conteiner__input" type="password" name="passwordRepeat">
+    <input class="form-conteiner__input rPassWordInput" type="password" name="passwordRepeat">
     </label> 
     <button class="form-conteiner__button form-botton" type="submit"><x-p-bold>Guardar</x-p-bold></button>
-    <error-text>Soy un error de prueba!</error-text>
     </form>
-
+    <div class="data-container"></div>
  `;
 
     this.shadow.appendChild(mainPage);
+
+    // TRAE LA DATA DEL USUARIO PARA LOS INPUTS DESDE EL STATE
+    this.importUserInputData();
 
     // SE AGREGAN LOS LISTENERS
     this.addListeners();

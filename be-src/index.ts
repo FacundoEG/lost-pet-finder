@@ -3,19 +3,14 @@ import * as express from "express";
 import * as path from "path";
 
 import { connectionTest } from "./models/connection";
-import { index } from "./lib/algolia";
-
 import { authMiddleWare } from "./middleware/methods";
-
 import {
   createNewUser,
   updateUser,
   getUserData,
   getUserReportedPets,
 } from "./controllers/user-controller";
-
 import { checkEmail, getToken } from "./controllers/auth-controller";
-
 import {
   reportNewPet,
   updatePetData,
@@ -23,6 +18,7 @@ import {
   deletePetData,
   getLostPetsByGeo,
 } from "./controllers/pet-controller";
+import { sentPetReport } from "./controllers/report-controller";
 
 const rutaRelativa = path.resolve(__dirname, "../fe-dist/index.html");
 
@@ -60,20 +56,24 @@ app.post("/user", async (req, res) => {
   // SI EL USUARIO ENVIA EL BODY VACIO RECIBE UN ERROR, SI NO RECIBE LA CONFIRMACIÓN
   if (newUserRes.error) {
     res.status(400).json(newUserRes);
-  } else {
+  }
+
+  if (newUserRes.message) {
     res.status(200).json(newUserRes);
   }
 });
 
 // UPDATE USER DATA
-app.patch("/user", authMiddleWare, async (req, res) => {
+app.post("/user/data", authMiddleWare, async (req, res) => {
   // SE ESPERA LA PROMESA DEL CONTROLLER
   const updateUserRes: any = await updateUser(req.body, req.userData.id);
 
   // SI EL USUARIO ENVIA EL BODY VACIO RECIBE UN ERROR, SI NO RECIBE LA CONFIRMACIÓN
   if (updateUserRes.error) {
     res.status(400).json(updateUserRes);
-  } else {
+  }
+
+  if (updateUserRes.message) {
     res.status(200).json(updateUserRes);
   }
 });
@@ -188,7 +188,7 @@ app.get("/pets/getbygeo", async (req, res) => {
 //
 // -- AUTH CONTROLLER --
 // AUTH EMAIL
-app.get("/auth", async (req, res) => {
+app.post("/auth", async (req, res) => {
   // SE ESPERA LA PROMESA DEL CONTROLLER
   const emailCheckRes: any = await checkEmail(req.body);
 
@@ -205,6 +205,37 @@ app.get("/auth", async (req, res) => {
   // SI ESTA REGISTRADO DEVUELVE TRUE
   if (emailCheckRes.true) {
     res.status(200).json(emailCheckRes);
+  }
+});
+
+// GET TOKEN BY AUTH
+app.post("/auth/token", async (req, res) => {
+  // SE ESPERA LA PROMESA DEL CONTROLLER
+  const authTokenResponse: any = await getToken(req.body);
+
+  // SI EL USUARIO ENVIA EL BODY VACIO O SUS DATOS NO SON CORRECTOS, RECIBE UN ERROR
+  if (authTokenResponse.error) {
+    res.status(400).json(authTokenResponse);
+  }
+
+  // SI LOS DATOS ESTAN CORRECTOS, DEVUELVE EL TOKEN
+  if (authTokenResponse.token) {
+    res.status(200).json(authTokenResponse);
+  }
+});
+
+//
+// -- REPORT CONTROLLER --
+// POST NEW PET REPORT
+app.post("/pets/report", async (req, res) => {
+  // SE ESPERA LA PROMESA DEL CONTROLLER
+  const newReportRes: any = await sentPetReport(req.body);
+
+  // SI EL USUARIO ENVIA EL BODY VACIO RECIBE UN ERROR
+  if (newReportRes.error) {
+    res.status(400).json(newReportRes);
+  } else {
+    res.status(200).json(newReportRes);
   }
 });
 

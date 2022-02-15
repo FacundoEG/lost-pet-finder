@@ -172,7 +172,7 @@ class Home extends HTMLElement {
     }
 
     .form-conteiner__button{
-      height: 50px;
+      min-height: 50px;
       min-width: 265px;
       border-radius: 4px;
       border: 3px solid #2c2c2c;

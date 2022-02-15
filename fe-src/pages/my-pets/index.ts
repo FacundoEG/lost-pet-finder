@@ -1,7 +1,11 @@
+import { state } from "../../state";
+
 const pawfondo = require("../../assets/paw-backgr.png");
 
 class MyPets extends HTMLElement {
   shadow: ShadowRoot;
+  petsData: any;
+  stateData: any;
   constructor() {
     super();
     this.shadow = this.attachShadow({ mode: "open" });
@@ -36,15 +40,97 @@ class MyPets extends HTMLElement {
     .main-container__title{
       margin: 30px auto;
     }
+
+    .data-container{
+      max-width: 1000px;
+      display: flex;
+      align-items: center;
+      flex-direction: column;
+      width: 100%;
+      margin: 30px auto 0px;
+      }
+
+      @media (min-width: 900px){
+        .data-container {
+        justify-content: center;
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 5%;
+        }
+      }
     `;
     this.shadow.appendChild(style);
   }
 
-  addListeners() {}
+  // AGREGA LOS LISTERS DE LA PAGE
+  addListeners() {
+    const dataContainer = this.shadow.querySelector(".data-container");
+
+    // SE RENDERIZA EL ICONO DE ESPERA
+    dataContainer.innerHTML = `<x-loader></x-loader>`;
+
+    // CREA UN FLAG PARA AVISARLE A LA PAGE CUANDO SE CARGUE EL TOKEN
+    const tokenFlag = setInterval(async () => {
+      const cs = state.getState();
+      const haveTokenFlag = cs.userData.token !== null;
+
+      // SI SE CARGO EL TOKEN EN EL STATE SE CORTA EL INTERVALO Y SE CONSULTA AL BACKEND
+      if (haveTokenFlag == true) {
+        clearInterval(tokenFlag);
+        const reportedPetsPromise = await state.getReportedPetsByUser();
+
+        // SI EL USUARIO NO REPORTO MASOTAS PERDIDAS, SE LE AVISA POR LA RESPUESTA
+        if (reportedPetsPromise.error) {
+          dataContainer.innerHTML = `
+      <x-caption>${reportedPetsPromise.error}</x-caption>
+      `;
+        }
+
+        // SI EL USUARIO REPORTO MASCOTAS PERDIDAS, SE RENDERIZAN LOS PETS
+        if (!reportedPetsPromise.error) {
+          // SE RENDERIZA EL ICONO DE ESPERA
+          dataContainer.innerHTML = `<x-loader></x-loader>`;
+
+          // SI HAY MASCOTAS SE CONVIERTE EL RESULTADO EN UN ARRAY
+          const petsArray = Object.values(reportedPetsPromise)[0];
+
+          // LIMPIA EL CONTENEDOR DONDE IRA LA DATA
+          this.cleanDataContainer();
+
+          // SE RENDERIZAN LAS CARDS DE LAS MASCOTAS SI LAS HAY, SI NO SE DEJA UN MENSAJE
+          this.renderPetCards(petsArray);
+        }
+      }
+    }, 100);
+  }
+
+  // SE LIMPIA EL CONTENEDOR DONDE IRA LA DATA
+  cleanDataContainer() {
+    const dataContainer = this.shadow.querySelector(".data-container");
+    while (dataContainer.firstChild) {
+      dataContainer.firstChild.remove();
+    }
+  }
+
+  // SE RENDERIZAN LAS CARDS CON LAS MASCOTAS PERDIDAS
+  renderPetCards(petsData) {
+    const dataContainer = this.shadow.querySelector(".data-container");
+    for (const pet of petsData) {
+      const petName = pet.name;
+      const petId = pet.id;
+      const petUbication = pet.ubication;
+
+      const petCardContainer = document.createElement("div");
+
+      petCardContainer.innerHTML = `
+    <lost-pet name=${petName} ubication=${petUbication} petId=${petId}></lost-pet>
+    `;
+      dataContainer.appendChild(petCardContainer);
+    }
+  }
 
   // SE CREA EL CONNECTED CALLBACK
   connectedCallback() {
-    // RENDERIZA LA PAGE
     this.render();
   }
   render() {
@@ -54,8 +140,8 @@ class MyPets extends HTMLElement {
     mainPage.innerHTML = `
     <section class="main-container">
     <x-title class="main-container__title">Mis mascotas reportadas</x-title>
-    <x-caption class="xcaption">AUN NO TIENES MASCOTAS REPORTADAS</x-caption>
     </section>
+    <div class="data-container"></div>
  `;
 
     this.shadow.appendChild(mainPage);

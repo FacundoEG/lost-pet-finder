@@ -1,8 +1,8 @@
 import { Sequelize } from "sequelize";
-/* 
-//ESTO HAY QUE COMENTARLO AL HACER DEPLOY!!
-import { sequalizePass } from "../../keys/sequalize"; */
 
+//ESTO HAY QUE COMENTARLO AL HACER DEPLOY!!
+/* import { sequalizePass } from "../../keys/sequalize";
+ */
 export const sequelize = new Sequelize({
   dialect: "postgres",
   username: "obsccrotjermzz",

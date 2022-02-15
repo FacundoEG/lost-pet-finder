@@ -1,3 +1,5 @@
+import { state } from "../../state";
+
 const xMark = require("../../assets/x-mark-white.png");
 
 class lostPet extends HTMLElement {
@@ -22,7 +24,7 @@ class lostPet extends HTMLElement {
      width: 100%;
      background-color: var(--card-bgc);
      max-width: 350px;
-     min-width: 275px;
+     min-width: 280px;
      border-radius: 5px;
      display: flex;
      flex-direction: column;
@@ -59,8 +61,8 @@ class lostPet extends HTMLElement {
   }
 
   addListeners() {
-    const reportLink = this.shadow.querySelector(".card-link");
     // ESCUCHA EL EVENTO CLICK DEL BOTON DE LA UBICACIÓN
+    const reportLink = this.shadow.querySelector(".card-link");
     reportLink.addEventListener("click", async (e) => {
       e.preventDefault();
 
@@ -76,7 +78,7 @@ class lostPet extends HTMLElement {
     const modalContainer =
       homePage.shadowRoot.querySelector(".modal-container");
 
-    // SE AGREGAN LOS TOGGLES
+    // SE AGREGAN LOS TOGGLES Y ESTILOS
     const modalContainerRef = modalContainer.querySelector(".report-modal");
     modalContainerRef.classList.toggle("active-modal");
     modalContainerRef.classList.toggle("desactive-modal");
@@ -144,27 +146,39 @@ class lostPet extends HTMLElement {
     // LISTENER DEL BOTON DEL FORM
     const modalForm: HTMLFormElement =
       modalContainer.querySelector(".form-conteiner");
-    modalForm.addEventListener("submit", (e: any) => {
+    modalForm.addEventListener("submit", async (e: any) => {
       e.preventDefault();
 
+      // REFERENCIA AL CONTENIDO DEL BOTTON DE ENVIAR
+      const buttonContent =
+        modalForm.querySelector(".form-botton").children[0].shadowRoot
+          .children[1];
+
       // SE EXTRAE LA DATA DEL FORM
-      const nameData = e.target.name.value;
-      const phoneData = e.target.phone.value;
-      const messageData = e.target.message.value;
-      console.log({
-        formData: {
-          petId,
-          nameData,
-          phoneData,
-          messageData,
-        },
-      });
+      const reportData = {
+        petId,
+        name: e.target.name.value,
+        phone: e.target.phone.value,
+        message: e.target.message.value,
+      };
 
-      // SE REINICIA EL FORM
-      modalForm.reset();
+      // SE ESPERA LA RESPUESTA DE LA PROMESA
+      const reportResponse = await state.sendPetReportInfo(reportData);
+      console.log(reportResponse);
 
-      // SE CIERRA EL MODAL
-      this.closeModal();
+      // SI SE ENVIA EL MENSAJE SE AVISA POR EL BOTON Y EN 1 SEG CERRARA EL MODAL
+      if (reportResponse.message) {
+        modalForm.reset();
+        buttonContent.textContent = "Informacion enviada!";
+        setTimeout(() => this.closeModal(), 1500);
+      }
+
+      // SI NO SE ENVIA EL MENSAJE, RESPONDE CON EL ERROR
+      if (reportResponse.error) {
+        buttonContent.textContent = reportResponse.error;
+        modalForm.reset();
+        setTimeout(() => (buttonContent.textContent = "Enviar"), 2000);
+      }
     });
   }
 
