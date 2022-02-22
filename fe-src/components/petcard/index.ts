@@ -2,6 +2,8 @@ import { Router } from "@vaadin/router";
 import { state } from "../../state";
 const pencil = require("../../assets/pencil.png");
 const xMark = require("../../assets/x-mark-white.png");
+const marker = require("../../assets/marker2.png");
+const paw = require("../../assets/pet-paw.png");
 
 class lostPet extends HTMLElement {
   shadow: ShadowRoot;
@@ -47,13 +49,22 @@ class lostPet extends HTMLElement {
      display:flex;
      flex-direction: row;
      padding: 0px 15px 0px ;
-     gap:5px;
+     gap:4px;
     }
 
     .card-link {
     text-align: end;
     padding: 10px 10px;
     cursor: pointer;
+    }
+
+    .marker{
+      width: 20px;
+      height: 20px;
+    }
+
+    .caption{
+      margin-left: 1px;
     }
 
     .card-image {
@@ -200,8 +211,8 @@ class lostPet extends HTMLElement {
     <img src=${this.petPhotoURL} class="card-image"></img>
     <x-subtitle class="card-title">${this.petName}</x-subtitle>
     <label class="card-label">
-    <x-p-bold>UBICACIÓN:</x-p-bold>
-    <x-caption>${this.petUbication}</x-caption></label>
+    <img src=${marker} class="marker"></img><x-p-bold>UBICACIÓN:</x-p-bold>
+    <x-caption class="caption">${this.petUbication}</x-caption></label>
     <x-linktext class="card-link">Reportar Información</x-linktext>
     `;
 
@@ -271,7 +282,7 @@ class myPet extends HTMLElement {
      display:flex;
      flex-direction: row;
      padding: 0px 15px 0px ;
-     gap:5px;
+     gap:4px;
     }
 
     .pencil-link {
@@ -287,6 +298,19 @@ class myPet extends HTMLElement {
     .pencil:active {
       filter: invert(59%) sepia(35%) saturate(1935%) hue-rotate(
       224deg) brightness(98%) contrast(88%);
+    }
+
+    .caption{
+      margin-left: 1px;
+    }
+
+    .state-label{
+      margin-top: 5px;
+    }
+
+    .marker{
+      width: 20px;
+      height: 20px;
     }
 
     .card-image {
@@ -331,12 +355,13 @@ class myPet extends HTMLElement {
     <img src=${this.petPhotoURL} class="card-image"></img>
     <x-subtitle class="card-title">${this.petName}</x-subtitle>
     <label class="card-label">
-    <x-p-bold>UBICACIÓN:</x-p-bold>
-    <x-caption>${this.petUbication}</x-caption></label>
-    <label class="card-label"><x-p-bold>ESTADO:</x-p-bold>
-    <x-caption class=${this.petState == "perdido" ? "lost" : "found"}>${
-      this.petState
-    }</x-caption></label></label>
+    <img src=${marker} class="marker"></img><x-p-bold>UBICACIÓN:</x-p-bold>
+    <x-caption class="caption">${this.petUbication}</x-caption></label>
+    <label class="card-label state-label">
+    <img src=${paw} class="marker"></img><x-p-bold>ESTADO:</x-p-bold>
+    <x-caption class="${
+      this.petState == "perdido" ? "lost" : "found"
+    } caption">${this.petState}</x-caption></label></label>
     <a class="pencil-link"><img class="pencil" src=${pencil}></img></a>
     `;
 

@@ -120,7 +120,7 @@ class MyPets extends HTMLElement {
       const petCardContainer = document.createElement("div");
 
       petCardContainer.innerHTML = `
-    <my-pet name=${name} ubication=${ubication} petId=${id} state=${state} photo=${photoUrl} lat=${lat} lng=${lng}></my-pet>
+    <my-pet name="${name}" ubication="${ubication}" petId=${id} state=${state} photo=${photoUrl} lat=${lat} lng=${lng}></my-pet>
     `;
       dataContainer.appendChild(petCardContainer);
     }

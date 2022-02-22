@@ -270,7 +270,7 @@ class Home extends HTMLElement {
       const petCardContainer = document.createElement("div");
 
       petCardContainer.innerHTML = `
-      <lost-pet name=${name} ubication=${ubication} petId=${id} photo=${photoUrl}></lost-pet>
+      <lost-pet name="${name}" ubication="${ubication}" petId=${id} photo=${photoUrl}></lost-pet>
       `;
       dataContainer.appendChild(petCardContainer);
     }
