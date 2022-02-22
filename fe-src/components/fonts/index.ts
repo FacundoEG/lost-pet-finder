@@ -157,6 +157,8 @@ class Caption extends HTMLElement {
       font-weight: 500;
       font-size: 16px;
       text-transform: uppercase;
+      text-align: center;
+      max-width: 400px;
     }
     
     `;
@@ -211,6 +213,7 @@ class ErrorText extends HTMLElement {
       font-weight: 500;
       font-size: 16px;
       text-transform: uppercase;
+      text-align: center;
     }
 
   

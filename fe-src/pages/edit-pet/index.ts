@@ -3,12 +3,14 @@ import { mapboxClient, MAPBOX_TOKEN } from "../../lib/mapbox";
 import * as mapboxgl from "mapbox-gl";
 import Dropzone from "dropzone";
 import { state } from "../../state";
+import { Router } from "@vaadin/router";
 
-class ReportPet extends HTMLElement {
+class editPet extends HTMLElement {
   shadow: ShadowRoot;
   searchData: any;
   map: any;
   photoUrl: any;
+  petData: any;
   constructor() {
     super();
     this.shadow = this.attachShadow({ mode: "open" });
@@ -39,7 +41,7 @@ class ReportPet extends HTMLElement {
       width: 100%;
       max-width: 400px;
       display: flex;
-      margin: 0 auto;
+      margin: 0 auto 20px;
       flex-direction: column;
       align-items: center;
       text-align: center;
@@ -112,6 +114,12 @@ class ReportPet extends HTMLElement {
       gap: 10px;
     }
 
+    .image-container img{
+      max-width:99%;
+      border: 3px solid #2c2c2c;
+      border-radius: 4px;
+    }
+
     .dz-image img {
         border-radius: 2px;
         border: #ffffff8a 1px solid;
@@ -143,7 +151,14 @@ class ReportPet extends HTMLElement {
     background-color: var(--button3-bgc)
     }
 
-      
+    .lost{
+      background-color: #0c5a0a
+    }
+
+    .finded{
+      background-color: #5e0b0b
+    }
+
      @media (min-width: 500px){
        .form-conteiner__button{
         width: 100%;
@@ -162,8 +177,9 @@ class ReportPet extends HTMLElement {
         align-items: center;
         flex-direction: column;
         width: 100%;
-        margin: 30px auto 0px;
+        margin: 0 auto 
         }
+
   
     @media (min-width: 900px){
           .data-container {
@@ -172,6 +188,7 @@ class ReportPet extends HTMLElement {
           flex-wrap: wrap;
           gap: 5%;
           }
+    
     `;
     this.shadow.appendChild(style);
   }
@@ -205,11 +222,12 @@ class ReportPet extends HTMLElement {
     const dataContainer = this.shadow.querySelector(".data-container");
     const mainForm: HTMLFormElement =
       this.shadow.querySelector(".form-conteiner");
-    const dropzone = this.shadow.querySelector(".foto-input");
     const searchButton = this.shadow.querySelector(".search-button");
     const ubicationInput: HTMLInputElement =
       mainForm.querySelector(".ubication-input");
-    const cancelButton = this.shadow.querySelector(".cancel-button");
+    const dropzone = this.shadow.querySelector(".foto-input");
+    const stateButton = this.shadow.querySelector(".state-button");
+    const depublishButton = this.shadow.querySelector(".depublish-button");
 
     // LISTENER DEL BOTON UBICACIÓN, GUARDA LA DATA DE LA BUSQUEDA Y CREA EL MARKER
     searchButton.addEventListener("click", (e: any) => {
@@ -217,7 +235,7 @@ class ReportPet extends HTMLElement {
       const inputValue = ubicationInput.value;
 
       // SI EL INPUT DE BUSQUEDA ESTA VACÍO, SE DEVUELVE UN ERROR
-      if (inputValue.trim() == "") {
+      if (inputValue == "") {
         dataContainer.innerHTML = `
       <error-text>Debes escribir algo para poder generar la ubicación</error-caption>
       `;
@@ -248,66 +266,159 @@ class ReportPet extends HTMLElement {
       }
     });
 
-    // LISTENER DEL FORM, ENVIA EL FORMULARIO PARA CREAR A LA NUEVA MASCOTA
     mainForm.addEventListener("submit", async (e: any) => {
       e.preventDefault();
+      const petData = this.petData;
       const nameData = e.target.name.value;
       const ubicationData = e.target.ubication.value;
 
-      // REVISA QUE EL USUARIO HAYA BRINDADO TODOS LOS DATOS
-      if (!nameData || !ubicationData || !this.searchData || !this.photoUrl) {
+      // GUARDA LA DATA PARA LA PROMESA
+      let newPetData = {};
+
+      nameData !== petData.name ? (newPetData["name"] = nameData) : "";
+      this.photoUrl !== null ? (newPetData["photoUrl"] = this.photoUrl) : "";
+      ubicationData !== petData.ubication && this.searchData !== null
+        ? ((newPetData["lat"] = this.searchData.lat),
+          ((newPetData["lng"] = this.searchData.lng),
+          (newPetData["ubication"] = ubicationData)))
+        : "";
+
+      const noChangeOfData = Object.entries(newPetData).length == 0;
+
+      if (noChangeOfData) {
         dataContainer.innerHTML = `
-      <error-text>Faltan datos para realizar la busqueda</error-caption>
+      <error-text>Necesitas modificar algun dato o buscar en el mapa para poder editar la mascota</error-caption>
       `;
       } else {
-        // INICIA EL LOADER
+        // SE CARGA EL LOADER
         dataContainer.innerHTML = `<x-loader></x-loader>`;
 
-        // GUARDA LA DATA PARA LA PROMESA
-        const newPetData = {
-          name: nameData,
-          photoUrl: this.photoUrl,
-          state: "perdido",
-          ubication: ubicationData,
-          lat: this.searchData.lat,
-          lng: this.searchData.lng,
-        };
+        // SE ESPERA LA PROMESA DE ACTUALIZACIÓN DE LA MASCOTA
+        const updatePetPromise = await state.updatePetData(
+          newPetData,
+          petData.id
+        );
 
-        // RECIBE LA RESPUESTA
-        const newReportedPetProm = await state.reportNewPet(newPetData);
-
-        // SI LA PROMESA SALE BIEN SE AVISA AL USER
-        if (newReportedPetProm.message) {
-          dataContainer.innerHTML = `<x-caption>${newReportedPetProm.message}</x-caption>`;
-        }
-
-        // SI LA PROMESA DEVUELVE UN ERROR SE AVISA AL USER
-        if (newReportedPetProm.error) {
+        if (updatePetPromise.message) {
           dataContainer.innerHTML = `
-          <x-caption>${newReportedPetProm.message}</x-caption>
-          `;
-        }
+        <x-caption>${updatePetPromise.message}</x-caption>
+        `;
 
-        // RESETEA LOS VALORES
-        dropzone.innerHTML = "Agregar foto";
-        mainForm.reset();
+          // DEVUELVE AL USER A MY-PETS
+          setTimeout(() => {
+            Router.go("/my-pets");
+          }, 2000);
+        }
       }
     });
 
     // LISTENER DEL BOTON CANCELAR, REINICIA DROPZONE Y EL FORM
-    cancelButton.addEventListener("click", async (e: any) => {
-      dropzone.innerHTML = "Agregar foto";
-      mainForm.reset();
+    stateButton.addEventListener("click", async (e: any) => {
+      const petData = this.petData;
+
+      // SE CARGA EL LOADER
+      dataContainer.innerHTML = `<x-loader></x-loader>`;
+
+      // SI EL LA MASCOTA ESTABA PERDIDA, LA PONE COMO ENCONTRADA Y LE AVISA AL USER
+      if (petData.state == "perdido") {
+        const newStateData = { state: "encontrado" };
+        const changePromise = await state.changePetState(
+          newStateData,
+          petData.id
+        );
+
+        if (changePromise.message) {
+          dataContainer.innerHTML = `
+        <x-caption>${changePromise.message}</x-caption>
+        `;
+
+          // DEVUELVE AL USER A MY-PETS
+          setTimeout(() => {
+            Router.go("/my-pets");
+          }, 2000);
+        }
+      }
+
+      // SI EL LA MASCOTA ESTABA ENCONTRADA, LA PONE COMO PERDIDA Y LE AVISA AL USER
+      if (petData.state == "encontrado") {
+        const newStateData = { state: "perdido" };
+        const changePromise = await state.changePetState(
+          newStateData,
+          petData.id
+        );
+        if (changePromise.message) {
+          dataContainer.innerHTML = `
+        <x-caption>${changePromise.message}</x-caption>
+        `;
+
+          // DEVUELVE AL USER A MY-PETS
+          setTimeout(() => {
+            Router.go("/my-pets");
+          }, 2000);
+        }
+      }
     });
+
+    // LISTENER DEL BOTON DEPUBLICAR, ELIMINA LA MASCOTA DE LA BASE DE DATOS
+    depublishButton.addEventListener("click", async (e: any) => {
+      const petData = this.petData;
+      // SE CARGA EL LOADER
+      dataContainer.innerHTML = `<x-loader></x-loader>`;
+
+      const deletePromise = await state.depublishPet(petData.id);
+      if (deletePromise.message) {
+        dataContainer.innerHTML = `
+      <x-caption>${deletePromise.message}</x-caption>
+      `;
+
+        // DEVUELVE AL USER A MY-PETS
+        setTimeout(() => {
+          Router.go("/my-pets");
+        }, 2000);
+      }
+    });
+  }
+
+  // ESTA FUNCION TRAE LA DATA PARA RELLENAR EL INPUT
+  importPetInputData() {
+    const petData = this.petData;
+    console.log(petData.id);
+
+    // SE DECLARAN LAS REFERENCIAS
+    const mainForm: HTMLFormElement =
+      this.shadow.querySelector(".form-conteiner");
+    const nameInput: HTMLInputElement = mainForm.querySelector(".name-input");
+    const ubicationInput: HTMLInputElement =
+      mainForm.querySelector(".ubication-input");
+
+    // SE AGREGAN LA DATA A LOS INPUTS
+    nameInput.value = petData.name;
+    ubicationInput.value = petData.ubication;
+
+    // CREA EL MARKER EN EL MAPA CON LA  ULTIMA UBICACIÓN DE LA MASCOTA
+    const coordinates = [petData.lng, petData.lat];
+    new mapboxgl.Marker().setLngLat(coordinates).addTo(this.map);
+    this.map.setCenter(coordinates);
+    this.map.setZoom(14);
   }
 
   // SE CREA EL CONNECTED CALLBACK
   connectedCallback() {
-    // RENDERIZA LA PAGE
-    this.render();
+    const cs = state.getState();
+    this.petData = cs.userData.petToEdit;
+
+    if (this.petData == null) {
+      Router.go("/my-pets");
+    } else {
+      // RENDERIZA LA PAGE
+      this.render();
+    }
   }
 
   render() {
+    const petData = this.petData;
+    const petState = petData.state;
+
     //SE CREA EL DIV DONDE SE ALOJARA LA PAGE
     const mainPage = document.createElement("main");
     mainPage.classList.add("welcome-container");
@@ -318,12 +429,18 @@ class ReportPet extends HTMLElement {
     />
 
     <form class="form-conteiner">
-    <x-title class="form-container__title">Reportar mascota perdida</x-title>
+    <x-title class="form-container__title">Editar mascota perdida</x-title>
 
     <label class="form-conteiner__label">
     <x-caption class="xcaption">Nombre</x-caption>
-    <input class="form-conteiner__input" type=text" name="name">
+    <input class="form-conteiner__input name-input" type=text" name="name">
     </label> 
+
+    <label class="form-conteiner__label">
+    <x-caption class="xcaption">Foto actual</x-caption>
+    <div class="image-container">
+    <img src=${petData.photo}></img>
+    </div></label> 
 
     <button class="foto-input" type="button">Agregar foto</button>
 
@@ -331,12 +448,19 @@ class ReportPet extends HTMLElement {
     <div class="form-conteiner__map"></div>
     <x-caption class="xcaption">Ubicación</x-caption>
     <input class="form-conteiner__input ubication-input" type="search" name="ubication">
-    <x-caption class="reference">Buscá un punto de referencia para reportar a tu mascota. Puede ser una dirección, un barrio o una ciudad.</x-caption>
+    <x-caption class="reference">Debes buscar un  nuevo punto de referencia para poder actualizar la ubicación de tu mascota.</x-caption>
     </label> 
 
     <button class="form-conteiner__button search-button button3" type="button"><x-p-bold>Buscar</x-p-bold></button>
-    <button class="form-conteiner__button" type="submit"><x-p-bold>Reportar como perdido</x-p-bold></button>
-    <button class="form-conteiner__button cancel-button button2" type="button"><x-p-bold>Cancelar</x-p-bold></button>
+    <button class="form-conteiner__button" type="submit"><x-p-bold>Guardar</x-p-bold></button>
+    <button class="form-conteiner__button state-button ${
+      petState == "perdido" ? "lost" : "finded"
+    }" type="button"><x-p-bold>${
+      petState == "perdido"
+        ? "Reportar como encontrado"
+        : "Reportar como perdido"
+    }</x-p-bold></button>
+    <a class="depublish-button"><x-linktext class="card-link">Despublicar</x-linktext></a>
     </form>
 
     <div class="data-container"></div>
@@ -349,8 +473,10 @@ class ReportPet extends HTMLElement {
 
     this.addPhotoListener();
 
+    this.importPetInputData();
+
     // SE AGREGAN LOS LISTENERS
     this.addListeners();
   }
 }
-customElements.define("report-pet-page", ReportPet);
+customElements.define("edit-pet-page", editPet);

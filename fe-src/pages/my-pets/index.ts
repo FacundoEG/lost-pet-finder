@@ -18,7 +18,7 @@ class MyPets extends HTMLElement {
       background-image: url(${pawfondo});
       background-repeat: revert;
       background-size: contain;
-      min-height: 82vh;
+      min-height: 90vh;
       padding: 30px 20px 70px;
       background-color: var(--page-bgc);
       display: flex;
@@ -116,14 +116,11 @@ class MyPets extends HTMLElement {
   renderPetCards(petsData) {
     const dataContainer = this.shadow.querySelector(".data-container");
     for (const pet of petsData) {
-      const petName = pet.name;
-      const petId = pet.id;
-      const petUbication = pet.ubication;
-
+      const { name, id, ubication, state, photoUrl, lat, lng } = pet;
       const petCardContainer = document.createElement("div");
 
       petCardContainer.innerHTML = `
-    <lost-pet name=${petName} ubication=${petUbication} petId=${petId}></lost-pet>
+    <my-pet name=${name} ubication=${ubication} petId=${id} state=${state} photo=${photoUrl} lat=${lat} lng=${lng}></my-pet>
     `;
       dataContainer.appendChild(petCardContainer);
     }

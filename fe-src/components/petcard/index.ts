@@ -1,5 +1,6 @@
+import { Router } from "@vaadin/router";
 import { state } from "../../state";
-
+const pencil = require("../../assets/pencil.png");
 const xMark = require("../../assets/x-mark-white.png");
 
 class lostPet extends HTMLElement {
@@ -7,6 +8,7 @@ class lostPet extends HTMLElement {
   petName: string;
   petId: string;
   petUbication: string;
+  petPhotoURL: string;
   constructor() {
     super();
     this.shadow = this.attachShadow({ mode: "open" });
@@ -15,6 +17,7 @@ class lostPet extends HTMLElement {
     this.petName = this.getAttribute("name");
     this.petId = this.getAttribute("petId");
     this.petUbication = this.getAttribute("ubication");
+    this.petPhotoURL = this.getAttribute("photo");
 
     // STYLES
     var style = document.createElement("style");
@@ -49,7 +52,8 @@ class lostPet extends HTMLElement {
 
     .card-link {
     text-align: end;
-    padding: 10px 10px
+    padding: 10px 10px;
+    cursor: pointer;
     }
 
     .card-image {
@@ -164,12 +168,11 @@ class lostPet extends HTMLElement {
 
       // SE ESPERA LA RESPUESTA DE LA PROMESA
       const reportResponse = await state.sendPetReportInfo(reportData);
-      console.log(reportResponse);
 
       // SI SE ENVIA EL MENSAJE SE AVISA POR EL BOTON Y EN 1 SEG CERRARA EL MODAL
       if (reportResponse.message) {
         modalForm.reset();
-        buttonContent.textContent = "Informacion enviada!";
+        buttonContent.textContent = reportResponse.message;
         setTimeout(() => this.closeModal(), 1500);
       }
 
@@ -188,19 +191,17 @@ class lostPet extends HTMLElement {
 
   render() {
     // SE DECLARA LA DATA PARA RENDERIZAR LAS CARDS
-    const petName = this.petName;
-    const petUbication = this.petUbication;
 
     const cardContainer = document.createElement("div");
     cardContainer.classList.add("card-container");
 
     // SE CREAN LAS CARDS CON LA DATA TRAIDA
     cardContainer.innerHTML = `
-    <img src="https://media.istockphoto.com/photos/little-raccoon-on-tree-picture-id514622028?k=20&m=514622028&s=612x612&w=0&h=okHZBkTHdGCmSlHMTLHwDtPe0GUjrUiypnxLJJjZSOs=" class="card-image"></img>
-    <x-subtitle class="card-title">${petName}</x-subtitle>
+    <img src=${this.petPhotoURL} class="card-image"></img>
+    <x-subtitle class="card-title">${this.petName}</x-subtitle>
     <label class="card-label">
     <x-p-bold>UBICACIÓN:</x-p-bold>
-    <x-caption>${petUbication}</x-caption></label>
+    <x-caption>${this.petUbication}</x-caption></label>
     <x-linktext class="card-link">Reportar Información</x-linktext>
     `;
 
@@ -211,3 +212,138 @@ class lostPet extends HTMLElement {
   }
 }
 customElements.define("lost-pet", lostPet);
+
+class myPet extends HTMLElement {
+  shadow: ShadowRoot;
+  petName: string;
+  petId: string;
+  petUbication: string;
+  petState: string;
+  petPhotoURL: string;
+  petLng: string;
+  petLat: string;
+  constructor() {
+    super();
+    this.shadow = this.attachShadow({ mode: "open" });
+
+    // SE EXTRAE LA DATA DE LOS ATRIBUTOS
+    this.petName = this.getAttribute("name");
+    this.petId = this.getAttribute("petId");
+    this.petUbication = this.getAttribute("ubication");
+    this.petState = this.getAttribute("state");
+    this.petPhotoURL = this.getAttribute("photo");
+    this.petLng = this.getAttribute("lng");
+    this.petLat = this.getAttribute("lat");
+
+    // STYLES
+    var style = document.createElement("style");
+    style.textContent = `
+    .card-container{
+     border: 2px solid #2c2c2c;
+     width: 100%;
+     background-color: var(--card-bgc);
+     max-width: 350px;
+     min-width: 280px;
+     border-radius: 5px;
+     display: flex;
+     flex-direction: column;
+     margin-bottom: 40px;
+    }
+
+    .card-container:hover {
+      border: 2px solid white;
+      box-shadow: 0px -1px 5px 3px rgb(255 255 255 / 5%);
+    }
+
+    .lost{
+      color: var(--font-error-text);
+    }
+
+    .found{
+      color: rgb(22 195 17);
+    }
+
+    .card-title {
+     padding: 15px 15px 0px ;
+    }
+
+    .card-label {
+     display:flex;
+     flex-direction: row;
+     padding: 0px 15px 0px ;
+     gap:5px;
+    }
+
+    .pencil-link {
+    padding: 0px 15px 15px;
+    text-align: end;
+    }
+
+    .pencil {
+    height: 24px;
+    cursor: pointer;
+    }
+
+    .pencil:active {
+      filter: invert(59%) sepia(35%) saturate(1935%) hue-rotate(
+      224deg) brightness(98%) contrast(88%);
+    }
+
+    .card-image {
+     height: 150px;
+     border-radius: 4px 4px 0px 0px;
+    }
+   `;
+    this.shadow.appendChild(style);
+  }
+
+  addListeners() {
+    // ESCUCHA EL EVENTO CLICK DEL BOTON DE LA UBICACIÓN
+    const reportLink = this.shadow.querySelector(".pencil-link");
+    reportLink.addEventListener("click", async (e) => {
+      e.preventDefault();
+
+      // SI SE TOCA EL BOTON DE PARA EDITAR, MANDA EL PET ID AL STATE Y ENVIA A LA PAGINA PARA EDITAR
+      state.setPetToEdit({
+        name: this.petName,
+        ubication: this.petUbication,
+        id: this.petId,
+        state: this.petState,
+        photo: this.petPhotoURL,
+        lng: this.petLng,
+        lat: this.petLat,
+      });
+      Router.go("/edit-pet");
+    });
+  }
+
+  connectedCallback() {
+    this.render();
+  }
+
+  render() {
+    // SE DECLARA LA DATA PARA RENDERIZAR LAS CARDS
+    const cardContainer = document.createElement("div");
+    cardContainer.classList.add("card-container");
+
+    // SE CREAN LAS CARDS CON LA DATA TRAIDA
+    cardContainer.innerHTML = `
+    <img src=${this.petPhotoURL} class="card-image"></img>
+    <x-subtitle class="card-title">${this.petName}</x-subtitle>
+    <label class="card-label">
+    <x-p-bold>UBICACIÓN:</x-p-bold>
+    <x-caption>${this.petUbication}</x-caption></label>
+    <label class="card-label"><x-p-bold>ESTADO:</x-p-bold>
+    <x-caption class=${this.petState == "perdido" ? "lost" : "found"}>${
+      this.petState
+    }</x-caption></label></label>
+    <a class="pencil-link"><img class="pencil" src=${pencil}></img></a>
+    `;
+
+    this.shadow.appendChild(cardContainer);
+
+    // SE AGREGAN LOS LISTENERS
+    this.addListeners();
+  }
+}
+customElements.define("my-pet", myPet);

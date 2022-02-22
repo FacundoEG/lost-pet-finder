@@ -16,7 +16,7 @@ class Auth extends HTMLElement {
      background-image: url(${pawbackgr});
      background-repeat: revert;
      background-size: contain;
-      min-height: 82vh;
+      min-height: 90vh;
       padding: 30px 20px 70px;
       background-color: var(--page-bgc);
       display: flex;
@@ -151,6 +151,7 @@ class Auth extends HTMLElement {
   // LISTENERS DEL FORM PARA ENVIAR LA CONTRASEÑA
   addPassWordListeners() {
     const dataContainer = this.shadow.querySelector(".data-container");
+    const passwordRecoverLink = this.shadow.querySelector(".passWordRecover");
     const mainForm: HTMLFormElement =
       this.shadow.querySelector(".form-conteiner");
 
@@ -189,6 +190,32 @@ class Auth extends HTMLElement {
       if (authPromise.error) {
         console.log(authPromise.error);
         dataContainer.innerHTML = `<error-text>${authPromise.error}</error-text>`;
+      }
+    });
+
+    // PASSWORD RECOVER
+    passwordRecoverLink.addEventListener("click", async (e: any) => {
+      const userEmail = state.getEmail();
+
+      // SE CREA UNA NUEVA CONTRASEÑA PROVISORIA
+      const newPassWord = nanoid(6);
+
+      // SE ENVIA AL BACKEND Y MANDA UN MAIL CON ESTA NUEVA CONTRASEÑA PARA INGRESAR
+      const recoverEmailRes = await state.recoverPassWordEmail({
+        userEmail,
+        newPassWord,
+      });
+
+      console.log(recoverEmailRes);
+
+      // SI TODO SALE BIEN, SE LE AVISA AL USUARIO
+      if (recoverEmailRes.message) {
+        dataContainer.innerHTML = `<x-caption>${recoverEmailRes.message}</x-caption>`;
+      }
+
+      // SI OCURRE UN ERROR, SE LE AVISA AL USUARIO
+      if (recoverEmailRes.error) {
+        dataContainer.innerHTML = `<error-text>${recoverEmailRes.error}</error-text>`;
       }
     });
   }
@@ -312,7 +339,7 @@ class Auth extends HTMLElement {
     <x-caption class="xcaption">Contraseña</x-caption>
     <input class="form-conteiner__input" type="password" name="password">
     </label> 
-    <x-linktext>¿Olvidaste tu contraseña?</x-linktext>
+    <x-linktext class="passWordRecover">¿Olvidaste tu contraseña?</x-linktext>
     <button class="form-conteiner__button" type="submit"><x-p-bold>Ingresar</x-p-bold></button>
     </form>
     <div class="data-container"></div>

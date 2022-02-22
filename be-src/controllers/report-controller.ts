@@ -1,5 +1,5 @@
 import { Report, Pet, User } from "../models/models";
-const ADMIN_EMAIL = "F_E_G.93@hotmail.com";
+import { sendReportEmail } from "../lib/sendgrid";
 
 async function sentPetReport(reportData: {
   name: string;
@@ -44,17 +44,25 @@ async function sentPetReport(reportData: {
     PetId: petId,
   });
 
-  // DEVUELVE LA DATA DE LA MASCOTA REPORTADA
-  return {
-    respuesta: "El reporte fue enviado correctamente",
+  // SE FORMATEA LA DATA PARA ENVIAR EL EMAIL
+  const emailData = {
     name,
     phone,
     message,
     petName: petData["name"],
-    petReporterName: reporterUserData["name"],
     petReporterEmail: reporterUserData["email"],
-    newReportPromise,
+    petReporterName: reporterUserData["name"],
   };
+
+  // SE ENVIA LA PROMESA DE ENVIO DE EMAIL
+  const promiseRes = await sendReportEmail(emailData);
+
+  // SI EL MAIL SE ENVIA CORRECTAMENTE, DEVUELVE LA RESPUESTA POR MENSAJE
+  if (promiseRes.response) {
+    return {
+      message: "Información enviada!",
+    };
+  }
 }
 
 export { sentPetReport };

@@ -1,5 +1,6 @@
 import { Pet } from "../models/models";
 import { index } from "../lib/algolia";
+import { cloudinary } from "../lib/cloudinary";
 
 // SE TIPA LAS CLASES DE ESTADO QUE PUEDE TENER UN PET
 type petState = "perdido" | "encontrado" | "despublicado";
@@ -29,10 +30,18 @@ async function reportNewPet(
     return { error: "Faltan datos de la mascota" };
   }
 
+  // SE SUBE LA IMAGEN A CLOUDINARY
+  const uploadRes = await cloudinary.v2.uploader.upload(
+    photoUrl,
+    function (error, result) {
+      console.log(result, error);
+    }
+  );
+
   // DA DE ALTA A LA MASCOTA EN LA TABLA PETS RELACIONANDOLA CON EL USER QUE LA PUBLICO
   const newReportedPet = await Pet.create({
     name,
-    photoUrl,
+    photoUrl: uploadRes.url,
     state,
     ubication,
     lat,
@@ -69,6 +78,17 @@ async function updatePetData(
   },
   petId: number
 ) {
+  // SI SE ENVIO EN EL BODY UNA NUEVA PHOTOURL, SE SUBE A CLOUDINARY Y SE ACTUALIZA EN LA PETICIÓN
+  if (petData.photoUrl) {
+    const uploadRes = await cloudinary.v2.uploader.upload(
+      petData.photoUrl,
+      function (error, result) {
+        console.log(result, error);
+      }
+    );
+    petData.photoUrl = uploadRes.url;
+  }
+
   // ACTUALIZA LA DATA DE LA MASCOTA EN LA TABLA PETS
   await Pet.update(petData, {
     where: { id: petId },
@@ -107,7 +127,6 @@ async function updatePetState(
   if (!petData.state) {
     return { error: "Faltan datos de la mascota" };
   }
-
   // EDITA EL ESTADO DE LA MASCOTA EN LA TABLA PETS
   await Pet.update(petData, {
     where: { id: petId },
@@ -127,7 +146,7 @@ async function updatePetState(
 
   // DEVUELVE LA DATA DE LA MASCOTA CON SU NUEVO STATE
   return {
-    message: "El estado de la mascota fue actualizada correctamente",
+    message: "El estado de la mascota fue actualizado correctamente",
     petUpdatedData,
   };
 }
@@ -158,7 +177,7 @@ async function getLostPetsByGeo(searchData: { lat: number; lng: number }) {
   // BUSCA A LAS MASCOTAS CERCANAS EN ALGOLIA
   const searchResponse = await index.search("", {
     aroundLatLng: `${lat}, ${lng}`,
-    aroundRadius: 10000,
+    aroundRadius: 200000,
   });
 
   // DEVUELVE LOS IDS DE LAS MASCOTAS ENCONTRADAS

@@ -106,7 +106,7 @@ async function getUserReportedPets(userDataId: number) {
   // TRAE LA DATA DE LA TABLA USER FITRANDO SOLO A LOS PETS QUE TENGAN EL STATE "PERDIDO"
   const userData = await User.findOne({
     where: { id: userDataId },
-    include: [{ model: Pet, where: { state: "perdido" } }],
+    include: Pet,
   });
 
   if (userData == null) {

@@ -8,6 +8,7 @@ import "./pages/auth";
 import "./pages/my-data";
 import "./pages/my-pets";
 import "./pages/repot-pet";
+import "./pages/edit-pet";
 import "./router";
 import { state } from "./state";
 

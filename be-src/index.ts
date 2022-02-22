@@ -10,7 +10,11 @@ import {
   getUserData,
   getUserReportedPets,
 } from "./controllers/user-controller";
-import { checkEmail, getToken } from "./controllers/auth-controller";
+import {
+  checkEmail,
+  getToken,
+  sentNewPassWordEmail,
+} from "./controllers/auth-controller";
 import {
   reportNewPet,
   updatePetData,
@@ -25,7 +29,7 @@ const rutaRelativa = path.resolve(__dirname, "../fe-dist/index.html");
 // API INIT AND CONFIG
 const port = process.env.PORT || 3000;
 const app = express();
-app.use(express.json());
+app.use(express.json({ limit: "5mb" }));
 app.use(cors());
 
 //
@@ -126,7 +130,7 @@ app.post("/pet", authMiddleWare, async (req, res) => {
 });
 
 // EDIT PET DATA
-app.patch("/pet/:petid", authMiddleWare, async (req, res) => {
+app.post("/pet/:petid", authMiddleWare, async (req, res) => {
   // SE ESPERA LA PROMESA DEL CONTROLLER
   const petDataUpdate: any = await updatePetData(
     req.body,
@@ -136,13 +140,15 @@ app.patch("/pet/:petid", authMiddleWare, async (req, res) => {
   // SI EL USUARIO ENVIA EL BODY VACIO RECIBE UN ERROR, SI NO RECIBE LA CONFIRMACIÓN
   if (petDataUpdate.error) {
     res.status(400).json(petDataUpdate);
-  } else {
+  }
+
+  if (petDataUpdate.message) {
     res.status(200).json(petDataUpdate);
   }
 });
 
 // EDIT PET STATE
-app.patch("/pet/state/:petid", authMiddleWare, async (req, res) => {
+app.post("/pet/state/:petid", authMiddleWare, async (req, res) => {
   // SE ESPERA LA PROMESA DEL CONTROLLER
   const petStateUpdate: any = await updatePetState(
     req.body,
@@ -152,7 +158,9 @@ app.patch("/pet/state/:petid", authMiddleWare, async (req, res) => {
   // SI EL USUARIO ENVIA EL BODY VACIO RECIBE UN ERROR, SI NO RECIBE LA CONFIRMACIÓN
   if (petStateUpdate.error) {
     res.status(400).json(petStateUpdate);
-  } else {
+  }
+
+  if (petStateUpdate.message) {
     res.status(200).json(petStateUpdate);
   }
 });
@@ -221,6 +229,24 @@ app.post("/auth/token", async (req, res) => {
   // SI LOS DATOS ESTAN CORRECTOS, DEVUELVE EL TOKEN
   if (authTokenResponse.token) {
     res.status(200).json(authTokenResponse);
+  }
+});
+
+// RECOVER PASSWORD EMAIL
+app.post("/auth/recover", async (req, res) => {
+  console.log(req.body);
+
+  // SE ESPERA LA PROMESA DEL CONTROLLER
+  const emailSentRes: any = await sentNewPassWordEmail(req.body);
+
+  // SI EL USUARIO ENVIA EL BODY VACIO RECIBE UN ERROR
+  if (emailSentRes.error) {
+    res.status(400).json(emailSentRes);
+  }
+
+  // SI NO ESTA REGISTRADO DEVUELVE FALSE
+  if (emailSentRes.message) {
+    res.status(200).json(emailSentRes);
   }
 });
 

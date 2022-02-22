@@ -18,7 +18,7 @@ class MyData extends HTMLElement {
      background-image: url(${pawBackground});
      background-repeat: revert;
      background-size: contain;
-      min-height: 82vh;
+     min-height: 90vh;
       padding: 30px 20px 70px;
       background-color: var(--page-bgc);
       display: flex;

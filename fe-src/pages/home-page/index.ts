@@ -15,7 +15,7 @@ class Home extends HTMLElement {
       background-image: url(${pawBackground});
       background-repeat: revert;
       background-size: contain;
-      min-height: 82vh;
+      min-height: 90vh;
       padding: 30px 20px 70px;
       background-color: var(--page-bgc);
       display: flex;
@@ -59,7 +59,6 @@ class Home extends HTMLElement {
       display: none;
       position: fixed; 
       z-index: 1; 
-      padding-top: 100px; 
       left: 0;
       top: 0;
       width: 100%; 
@@ -89,12 +88,12 @@ class Home extends HTMLElement {
     }
 
     .active-modal {
-      display: block;
+      display: flex;
       animation: entrance 1.0s ease 0s 1 normal forwards;
     }
 
     .desactive-modal {
-      display: inherit;
+      display: flex;
       animation: exit 1.0s ease 0s 1 normal forwards;
     }
     
@@ -214,12 +213,6 @@ class Home extends HTMLElement {
       gap: 5px;
       }
     }
-
-    @media (max-height: 750px){
-      .report-modal{
-      padding-top: 5px
-      }
-    }
     `;
     this.shadow.appendChild(style);
   }
@@ -273,14 +266,11 @@ class Home extends HTMLElement {
   renderPetCards(petsData) {
     const dataContainer = this.shadow.querySelector(".data-container");
     for (const pet of petsData.findedPets) {
-      const petName = pet.name;
-      const petId = pet.id;
-      const petUbication = pet.ubication;
-
+      const { name, id, ubication, photoUrl } = pet;
       const petCardContainer = document.createElement("div");
 
       petCardContainer.innerHTML = `
-      <lost-pet name=${petName} ubication=${petUbication} petId=${petId}></lost-pet>
+      <lost-pet name=${name} ubication=${ubication} petId=${id} photo=${photoUrl}></lost-pet>
       `;
       dataContainer.appendChild(petCardContainer);
     }

@@ -2,10 +2,7 @@ import * as jwt from "jsonwebtoken";
 import * as bearerToken from "bearer-token";
 import * as crypto from "crypto";
 
-// COMENTAR ESTO AL HACER DEPLOY!
-/* import { SECRET } from "../../keys/secret";
- */
-const APPSECRET = process.env.API_SECRET; /* || SECRET; */
+const APPSECRET = process.env.API_SECRET;
 
 function authMiddleWare(req, res, next) {
   bearerToken(req, async (err, token) => {

@@ -247,8 +247,7 @@ class HeaderComp extends HTMLElement {
       const csEmail = state.getEmail();
       this.userEmail = csEmail || "Invitado";
       this.userToken = csToken || null;
-      this.shadow.children[1].remove();
-      this.render();
+      this.updateHeader();
     });
     // PIDE LA DATA DEL STATE RENDERIZA LA PAGE
     const csToken = state.getToken();
@@ -282,11 +281,11 @@ class HeaderComp extends HTMLElement {
      <div class="user-data__container">
      <div class="user-data__box">
      <img src=${user} class="user-data__img"></img>
-     <x-parrafo>${
+     <div class="user-email"><x-parrafo>${
        this.userEmail && this.userToken !== null ? this.userEmail : "Invitadx"
-     }</x-parrafo>
+     }</x-parrafo></div>
      </div>
-     <a class="close-session"><x-linktext>${
+     <a class="close-session"><x-linktext class="session-text">${
        this.userEmail !== "Invitado" ? "CERRAR SESIÓN" : "INICIAR SESIÓN"
      }</x-linktext></a>
      </div>
@@ -306,6 +305,20 @@ class HeaderComp extends HTMLElement {
 
     // SE AGREGAN LOS LISTENERS
     this.addListeners();
+  }
+
+  // ESTA FUNCIÓN ACUALIZA EL CONTENIDO DEL HEADER TRAIDO DESDE EL STATE
+  updateHeader() {
+    const closeSession = this.shadow.querySelector(".close-session");
+    const userEmail = this.shadow.querySelector(".user-email");
+
+    closeSession.innerHTML = `<x-linktext class="session-text">${
+      this.userToken !== null ? "CERRAR SESIÓN" : "INICIAR SESIÓN"
+    }</x-linktext>`;
+
+    userEmail.innerHTML = `<x-parrafo>${
+      this.userEmail && this.userToken !== null ? this.userEmail : "Invitadx"
+    }</x-parrafo>`;
   }
 }
 customElements.define("header-comp", HeaderComp);

@@ -1,11 +1,9 @@
 import * as jwt from "jsonwebtoken";
 import { Auth } from "../models/models";
 import { getHashFromString } from "../middleware/methods";
+import { recoverPassWordEmail } from "../lib/sendgrid";
 
-/* // COMENTAR ESTO AL HACER DEPLOY!
-import { SECRET } from "../../keys/secret"; */
-
-const APPSECRET = process.env.API_SECRET; /*  || SECRET; */
+const APPSECRET = process.env.API_SECRET;
 
 async function checkEmail(userData: { email: string }) {
   const { email } = userData;
@@ -60,4 +58,41 @@ async function getToken(userData: { email: string; password: string }) {
     };
   }
 }
-export { checkEmail, getToken };
+
+async function sentNewPassWordEmail(recoverData: {
+  userEmail: string;
+  newPassWord: string;
+}) {
+  const { userEmail, newPassWord } = recoverData;
+
+  // VERIFICA QUE TODOS LOS DATOS DEL USER LLEGUEN CORRECTAMENTE
+  if (!recoverData.userEmail || !recoverData.newPassWord) {
+    return { error: "Faltan datos para enviar el reporte" };
+  }
+
+  // SE EXTRAE LA DATA
+  const emailData = { userEmail, newPassWord };
+
+  // SE HASEHA LA NUEVA CONTRASEÑA
+  const newPassWordHashed = getHashFromString(newPassWord);
+
+  // SE EDITA LA NUEVA CONTRASEÑA EN LA TABLA AUTH
+  await Auth.update(
+    { password: newPassWordHashed },
+    {
+      where: { email: userEmail },
+    }
+  );
+
+  // SE ENVIA LA PROMESA DE ENVIO DE EMAIL
+  const promiseRes = await recoverPassWordEmail(emailData);
+
+  // SI EL MAIL SE ENVIA CORRECTAMENTE, DEVUELVE LA RESPUESTA POR MENSAJE
+  if (promiseRes.response) {
+    return {
+      message:
+        "Te hemos enviado un email a tu casilla de correo con tu nueva contraseña provisoria",
+    };
+  }
+}
+export { checkEmail, getToken, sentNewPassWordEmail };

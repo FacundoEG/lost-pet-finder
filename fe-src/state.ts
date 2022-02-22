@@ -1,14 +1,5 @@
 const API_BASE_URL = process.env.API_BASE_URL || "http://localhost:3000";
 
-/* 
-    <div class="main-form-container"> 
-    <x-title>Soy el title</x-title>
-    <x-subtitle>Soy el subtitle</x-subtitle>
-    <x-parrafo>Soy el parrafo</x-parrafo>
-    <x-p-bold>Soy el parrafo bold</x-p-bold>
-    <x-caption>Soy el caption</x-caption>
-    <x-linktext>Soy el linktext</x-linktext> */
-
 const state = {
   data: {
     userData: {
@@ -17,8 +8,8 @@ const state = {
       token: null,
       name: null,
       nanoid: null,
-      myReportedPets: null,
       pageToGo: null,
+      petToEdit: null,
     },
   },
   listeners: [],
@@ -87,10 +78,10 @@ const state = {
     this.setState(currentState);
   },
 
-  // SETEA LA NUEVA LISTA DE MASCOTAS
-  setMyPets(petsArray) {
+  // SETEA EL ID DE LA MASCOTA PARA EDITAR
+  setPetToEdit(petId) {
     const currentState = this.getState();
-    currentState.userData.myReportedPets = petsArray;
+    currentState.userData.petToEdit = petId;
     this.setState(currentState);
   },
 
@@ -253,12 +244,105 @@ const state = {
       });
   },
 
+  // CREA AL NUEVO USUARIO EN LA BASE DE DATOS
+  reportNewPet(petData) {
+    const cs = state.getState();
+    const token = cs.userData.token;
+    return fetch(API_BASE_URL + `/pet`, {
+      method: "post",
+      headers: {
+        "content-type": "application/json",
+        Authorization: `bearer ${token}`,
+      },
+      body: JSON.stringify(petData),
+    })
+      .then((res) => {
+        return res.json();
+      })
+      .then((finalres) => {
+        return finalres;
+      });
+  },
+
+  // CAMBIA EL ESTADO DE LA MASCOTA
+  changePetState(petState, petId) {
+    const cs = state.getState();
+    const token = cs.userData.token;
+    return fetch(API_BASE_URL + `/pet/state/${petId}`, {
+      method: "post",
+      headers: {
+        "content-type": "application/json",
+        Authorization: `bearer ${token}`,
+      },
+      body: JSON.stringify(petState),
+    })
+      .then((res) => {
+        return res.json();
+      })
+      .then((finalres) => {
+        return finalres;
+      });
+  },
+
+  // CAMBIA EL ESTADO DE LA MASCOTA
+  updatePetData(petData, petId) {
+    const cs = state.getState();
+    const token = cs.userData.token;
+    return fetch(API_BASE_URL + `/pet/${petId}`, {
+      method: "post",
+      headers: {
+        "content-type": "application/json",
+        Authorization: `bearer ${token}`,
+      },
+      body: JSON.stringify(petData),
+    })
+      .then((res) => {
+        return res.json();
+      })
+      .then((finalres) => {
+        return finalres;
+      });
+  },
+
+  // CREA AL NUEVO USUARIO EN LA BASE DE DATOS
+  depublishPet(petId) {
+    const cs = state.getState();
+    const token = cs.userData.token;
+    return fetch(API_BASE_URL + `/pet/delete/${petId}`, {
+      method: "delete",
+      headers: {
+        Authorization: `bearer ${token}`,
+      },
+    })
+      .then((res) => {
+        return res.json();
+      })
+      .then((finalres) => {
+        return finalres;
+      });
+  },
+
   // ENVIA LOS DATOS PARA REPORTAR NUEVA INFORMACIÓN DE LA MASCOTA
   sendPetReportInfo(reportData) {
     return fetch(API_BASE_URL + "/pets/report", {
       method: "post",
       headers: { "content-type": "application/json" },
       body: JSON.stringify(reportData),
+    })
+      .then((res) => {
+        return res.json();
+      })
+      .then((finalres) => {
+        return finalres;
+      });
+  },
+
+  // ENVIA LOS DATOS PARA RECUPERAR LA NUEVA CONTRASEÑA AL NO PODER INICIAR
+  recoverPassWordEmail(emailData) {
+    return fetch(API_BASE_URL + "/auth/recover", {
+      method: "post",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(emailData),
     })
       .then((res) => {
         return res.json();
