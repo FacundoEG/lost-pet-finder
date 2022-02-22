@@ -177,7 +177,7 @@ async function getLostPetsByGeo(searchData: { lat: number; lng: number }) {
   // BUSCA A LAS MASCOTAS CERCANAS EN ALGOLIA
   const searchResponse = await index.search("", {
     aroundLatLng: `${lat}, ${lng}`,
-    aroundRadius: 200000,
+    aroundRadius: 23000,
   });
 
   // DEVUELVE LOS IDS DE LAS MASCOTAS ENCONTRADAS
