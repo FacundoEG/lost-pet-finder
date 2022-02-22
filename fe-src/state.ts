@@ -1,5 +1,6 @@
 const API_BASE_URL = process.env.API_BASE_URL || "http://localhost:3000";
 
+// BASE DATA
 const state = {
   data: {
     userData: {
@@ -116,6 +117,8 @@ const state = {
     this.listeners.push(callback);
   },
 
+  // ///////// TEST METHODS //////////
+
   // TESTEA LA CONEXIÓN A SEQUALIZE
   test() {
     return fetch(API_BASE_URL + "/test", {
@@ -129,6 +132,7 @@ const state = {
       });
   },
 
+  // ----- AUTH METHODS -----
   // CHEQUEA SI EL USUARIO ESTA REGISTRADO O NO
   emailCheck(emailData) {
     return fetch(API_BASE_URL + "/auth", {
@@ -159,6 +163,8 @@ const state = {
       });
   },
 
+  ///////// USER METHODS //////////
+
   // CREA AL NUEVO USUARIO EN LA BASE DE DATOS
   createNewUser(newUserData) {
     return fetch(API_BASE_URL + "/user", {
@@ -174,7 +180,7 @@ const state = {
       });
   },
 
-  // CREA AL NUEVO USUARIO EN LA BASE DE DATOS
+  // EDITA UN USUARIO EN LA BASE DE DATOS
   updateUserData(updateData) {
     const cs = state.getState();
     const token = cs.userData.token;
@@ -230,6 +236,7 @@ const state = {
       });
   },
 
+  ///////// PETS METHODS //////////
   // TRAE LAS MASCOTAS PERDIDAS BUSCANDO POR LA UBICACIÓN
   getLostPetsByGeo() {
     const { lat, lng } = this.getState().userData.geoLocation;
@@ -244,7 +251,7 @@ const state = {
       });
   },
 
-  // CREA AL NUEVO USUARIO EN LA BASE DE DATOS
+  // REPORTA A UNA NUEVA MASCOTA EN LA BASE DE DATOS
   reportNewPet(petData) {
     const cs = state.getState();
     const token = cs.userData.token;
@@ -284,7 +291,7 @@ const state = {
       });
   },
 
-  // CAMBIA EL ESTADO DE LA MASCOTA
+  // EDITA LA INFORMACIÓN SOBRE UNA MASCOTA REPORTADA
   updatePetData(petData, petId) {
     const cs = state.getState();
     const token = cs.userData.token;
@@ -304,7 +311,7 @@ const state = {
       });
   },
 
-  // CREA AL NUEVO USUARIO EN LA BASE DE DATOS
+  // DESPUBLICA A UNA MASCOTA DE LA BASE DE DATOS
   depublishPet(petId) {
     const cs = state.getState();
     const token = cs.userData.token;
@@ -322,7 +329,9 @@ const state = {
       });
   },
 
-  // ENVIA LOS DATOS PARA REPORTAR NUEVA INFORMACIÓN DE LA MASCOTA
+  ///////// REPORT METHODS //////////
+
+  // ENVIA LOS DATOS PARA DAR UN NUEVO INFORME SOBRE UNA MASCOTA PERDIDA
   sendPetReportInfo(reportData) {
     return fetch(API_BASE_URL + "/pets/report", {
       method: "post",
@@ -336,6 +345,8 @@ const state = {
         return finalres;
       });
   },
+
+  ///////// USER RESTORE METHODS //////////
 
   // ENVIA LOS DATOS PARA RECUPERAR LA NUEVA CONTRASEÑA AL NO PODER INICIAR
   recoverPassWordEmail(emailData) {
@@ -351,6 +362,8 @@ const state = {
         return finalres;
       });
   },
+
+  ///////// RESTORE STATE METHODS //////////
 
   //SI NO HAY REGISTRO DE "USERDATA", SE ASEGURA DE INICIAR EL STATE VACIO
   restoreState() {
